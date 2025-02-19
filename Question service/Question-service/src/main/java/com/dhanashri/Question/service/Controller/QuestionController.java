@@ -48,11 +48,27 @@ public class QuestionController {
         return questionService.getAllQuestions();
     }
 
-
-
     @GetMapping("getQuestionByCategory/{category}")
     public ResponseEntity<List<Question>> getQuestionsByCategory(@PathVariable String category)
     {
         return questionService.getQuestionsByCategory(category);
     }
+    @GetMapping("generateQuiz")
+    public ResponseEntity<List<Integer>> getQuestionsForQuiz(@RequestParam String category, @RequestParam int numberOfQuestions)
+    {
+        return questionService.getQuestionsForQuiz(category,numberOfQuestions);
+    }
+
+    @PostMapping("getQuestions")
+    public ResponseEntity<List<QuestionWrapper>> getQuestionsFromId(@RequestBody List<Integer> questionIds)
+    {
+        return questionService.getQuestionsFromId(questionIds);
+    }
+
+    @PostMapping("getScore")
+    public ResponseEntity<Integer> getScore(@RequestBody List<Response> responses)
+    {
+        return questionService.getScore(responses);
+    }
+
 }

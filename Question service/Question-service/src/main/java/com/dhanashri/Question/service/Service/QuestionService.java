@@ -3,6 +3,7 @@ package com.dhanashri.Question.service.Service;
 import com.dhanashri.Question.service.Dao.QuestionDao;
 import com.dhanashri.Question.service.Module.Question;
 import com.dhanashri.Question.service.Module.QuestionWrapper;
+import com.dhanashri.Question.service.Module.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -98,6 +99,70 @@ public class QuestionService {
         {
             e.printStackTrace();
             return new ResponseEntity<>(new ArrayList<>(),HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public ResponseEntity<List<Integer>> getQuestionsForQuiz(String category, int numberOfQuestions) {
+        try {
+            List<Integer> questionList = questionDao.findRandomQuestionsByCategory(category,numberOfQuestions);
+
+            return new ResponseEntity<>(questionList, HttpStatus.OK);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return new ResponseEntity<>(new ArrayList<>(),HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public ResponseEntity<List<QuestionWrapper>> getQuestionsFromId(List<Integer> questionIds) {
+        try{
+            List<QuestionWrapper> questionWrapper = new ArrayList<>();
+            List<Question>  questions  = new ArrayList<>();
+            for(int id:questionIds)
+            {
+                questions.add(questionDao.findById(id).get());
+            }
+
+            for(Question  q:questions)
+            {
+                QuestionWrapper questionWrapper1 = new QuestionWrapper();
+                questionWrapper1.setId(q.getId());
+                questionWrapper1.setQuestion(q.getQuestion());
+                questionWrapper1.setCategory(q.getCategory());
+                questionWrapper1.setOption_1(q.getOption_1());
+                questionWrapper1.setOption_2(q.getOption_2());
+                questionWrapper1.setOption_3(q.getOption_3());
+                questionWrapper1.setOption_4(q.getOption_4());
+
+                questionWrapper.add(questionWrapper1);
+            }
+            return new ResponseEntity<>(questionWrapper, HttpStatus.OK);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return new ResponseEntity<>(new ArrayList<>(),HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public ResponseEntity<Integer> getScore(List<Response> responses) {
+        try{
+            int score = 0;
+            for(Response response:responses)
+            {
+                Question  question = questionDao.findById(response.getId()).get();
+                if(response.getResponse().equals(question.getAns()))
+                {
+                    score++;
+                }
+            }
+            return new ResponseEntity<>(score,HttpStatus.OK);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return new ResponseEntity<>(0,HttpStatus.BAD_REQUEST);
         }
     }
 }
