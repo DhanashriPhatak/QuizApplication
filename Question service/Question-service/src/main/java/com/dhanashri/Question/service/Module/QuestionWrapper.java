@@ -4,7 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
+//@NoArgsConstructor
 public class QuestionWrapper {
     private int id;
     private String question;
@@ -14,8 +14,8 @@ public class QuestionWrapper {
     private String option_4;
     private String category;
 
-//    public QuestionWrapper() {
-//    }
+    public QuestionWrapper() {
+    }
 
     public QuestionWrapper(int id, String option_1, String option_2, String option_3, String option_4, String question,String category) {
         this.id = id;

@@ -4,7 +4,6 @@ import com.dhanashri.Question.service.Module.Question;
 import com.dhanashri.Question.service.Module.QuestionWrapper;
 import com.dhanashri.Question.service.Module.Response;
 import com.dhanashri.Question.service.Service.QuestionService;
-import jakarta.persistence.GeneratedValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,29 +17,45 @@ public class QuestionController {
     @Autowired
     QuestionService questionService;
 
+    /*
+    To Add a new Question
+     */
     @PostMapping("add")
     public ResponseEntity<String> addQuestion(@RequestBody Question question)
     {
         return questionService.addQuestion(question);
     }
 
+    /*
+    To edit any existing question
+     */
     @PostMapping("edit")
     public ResponseEntity<String> editQuestion(@RequestBody Question question)
     {
         return questionService.editQuestion(question);
     }
 
+    /*
+    Description: To delete any question
+     */
     @DeleteMapping("deleteQuestion/{id}")
     public ResponseEntity<String> deleteQuesiton(@PathVariable int id)
     {
         return questionService.deleteQuestion(id);
     }
 
+    /*
+    Description:- To get a Single Question by ID
+     */
     @GetMapping("getQuestion/{id}")
     public ResponseEntity<QuestionWrapper> getQuesitonById(@PathVariable int id)
     {
         return questionService.getQuesitonById(id);
     }
+
+    /*
+    Description:- To get All Questions
+     */
 
     @GetMapping("getAllQuestions")
     public ResponseEntity<List<Question>> getAllQuestions()
@@ -48,23 +63,36 @@ public class QuestionController {
         return questionService.getAllQuestions();
     }
 
+    /*
+    Description:- To get Questions by category
+     */
     @GetMapping("getQuestionByCategory/{category}")
     public ResponseEntity<List<Question>> getQuestionsByCategory(@PathVariable String category)
     {
         return questionService.getQuestionsByCategory(category);
     }
+
+    /*
+    Description:- Generate Quiz by Category and No of questions
+     */
     @GetMapping("generateQuiz")
     public ResponseEntity<List<Integer>> getQuestionsForQuiz(@RequestParam String category, @RequestParam int numberOfQuestions)
     {
         return questionService.getQuestionsForQuiz(category,numberOfQuestions);
     }
 
+    /*
+     Description: Return All the question based on list of id's provided
+     */
     @PostMapping("getQuestions")
     public ResponseEntity<List<QuestionWrapper>> getQuestionsFromId(@RequestBody List<Integer> questionIds)
     {
         return questionService.getQuestionsFromId(questionIds);
     }
 
+    /*
+    Description:- Return Score got in the quiz based on response provided
+     */
     @PostMapping("getScore")
     public ResponseEntity<Integer> getScore(@RequestBody List<Response> responses)
     {

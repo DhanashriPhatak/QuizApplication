@@ -60,7 +60,7 @@ public class QuestionService {
         QuestionWrapper questionWrapper = new QuestionWrapper();
         try{
             Optional<Question> questionOptional = questionDao.findById(id);
-            Question question = questionOptional.get();
+            Question question = questionOptional.orElseThrow(() -> new RuntimeException("Question not found"));
 
             questionWrapper.setId(question.getId());
             questionWrapper.setQuestion(question.getQuestion());
