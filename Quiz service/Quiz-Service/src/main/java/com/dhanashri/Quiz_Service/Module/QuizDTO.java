@@ -6,5 +6,5 @@ import lombok.Data;
 public class QuizDTO {
     private String category;
     private String quiz_title;
-    private int no_of_questions;
+    private int numberOfQuestions;
 }

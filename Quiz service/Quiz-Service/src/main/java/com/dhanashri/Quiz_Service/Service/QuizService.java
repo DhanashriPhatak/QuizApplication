@@ -24,7 +24,7 @@ public class QuizService {
 
     public ResponseEntity<String> createQuiz(QuizDTO quizDTO) {
         try{
-            List<Integer> questionIds = quizInterface.getQuestionForQuiz(quizDTO.getCategory(), quizDTO.getNo_of_questions()).getBody();
+            List<Integer> questionIds = quizInterface.getQuestionForQuiz(quizDTO.getCategory(), quizDTO.getNumberOfQuestions()).getBody();
             Quiz quiz = new Quiz();
             quiz.setQuiz_title(quizDTO.getQuiz_title());
             List<QuizQuestion> quizQuestionList = new ArrayList<>();
@@ -36,7 +36,7 @@ public class QuizService {
                 quizQuestion.setQuiz(quiz);
                 quizQuestionList.add(quizQuestion);
             }
-
+            System.out.println("check");
             quiz.setQuestions(quizQuestionList);
             quizDao.save(quiz);
 
@@ -45,8 +45,8 @@ public class QuizService {
         }
         catch(Exception e)
         {
-//            return new ResponseEntity<>("Something Went Wrong",HttpStatus.BAD_REQUEST);
-            return ResponseEntity.badRequest().body("Something went Wrong");
+//          return new ResponseEntity<>("Something Went Wrong",HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 

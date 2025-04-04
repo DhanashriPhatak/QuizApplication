@@ -16,7 +16,7 @@ public class QuizController {
     @Autowired
     QuizService quizService;
 
-    @PostMapping("create")
+    @PostMapping("generateQuiz")
     public ResponseEntity<String> createQuiz(@RequestBody QuizDTO quizDTO)
     {
         return quizService.createQuiz(quizDTO);
