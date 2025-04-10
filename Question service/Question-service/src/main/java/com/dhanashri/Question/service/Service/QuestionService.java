@@ -151,7 +151,7 @@ public class QuestionService {
             int score = 0;
             for(Response response:responses)
             {
-                Question  question = questionDao.findById(response.getId()).get();
+                Question  question = questionDao.findById(response.getQuiz_question_id()).get();
                 if(response.getResponse().equals(question.getAns()))
                 {
                     score++;
