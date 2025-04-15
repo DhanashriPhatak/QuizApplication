@@ -60,6 +60,7 @@ public class QuestionController {
     @GetMapping("getAllQuestions")
     public ResponseEntity<List<Question>> getAllQuestions()
     {
+        System.out.println("inside method");
         return questionService.getAllQuestions();
     }
 
@@ -67,7 +68,7 @@ public class QuestionController {
     Description:- To get Questions by category
      */
     @GetMapping("getQuestionByCategory/{category}")
-    public ResponseEntity<List<Question>> getQuestionsByCategory(@PathVariable String category)
+    public ResponseEntity<List<Question>> getQuestionsByCategory(@PathVariable int category)
     {
         return questionService.getQuestionsByCategory(category);
     }
@@ -76,9 +77,9 @@ public class QuestionController {
     Description:- Generate Quiz by Category and No of questions
      */
     @GetMapping("generateQuiz")
-    public ResponseEntity<List<Integer>> getQuestionsForQuiz(@RequestParam String category, @RequestParam int numberOfQuestions)
+    public ResponseEntity<List<Integer>> getQuestionsForQuiz(@RequestParam int category_id, @RequestParam int numberOfQuestions)
     {
-        return questionService.getQuestionsForQuiz(category,numberOfQuestions);
+        return questionService.getQuestionsForQuiz(category_id,numberOfQuestions);
     }
 
     /*

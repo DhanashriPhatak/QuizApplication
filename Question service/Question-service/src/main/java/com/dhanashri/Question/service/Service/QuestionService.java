@@ -1,6 +1,8 @@
 package com.dhanashri.Question.service.Service;
 
+import com.dhanashri.Question.service.Dao.CategoryDao;
 import com.dhanashri.Question.service.Dao.QuestionDao;
+import com.dhanashri.Question.service.Module.Category;
 import com.dhanashri.Question.service.Module.Question;
 import com.dhanashri.Question.service.Module.QuestionWrapper;
 import com.dhanashri.Question.service.Module.Response;
@@ -18,6 +20,9 @@ public class QuestionService {
 
     @Autowired
     QuestionDao questionDao;
+
+    @Autowired
+    CategoryDao categoryDao;
 
     //To Add a question in Question Database
     public ResponseEntity<String> addQuestion(Question question) {
@@ -91,9 +96,10 @@ public class QuestionService {
         }
     }
 
-    public ResponseEntity<List<Question>> getQuestionsByCategory(String category) {
+    public ResponseEntity<List<Question>> getQuestionsByCategory(int category) {
         try{
-            return new ResponseEntity<>(questionDao.findByCategory(category),HttpStatus.OK);
+            Category category1 = categoryDao.findById(category).get();
+            return new ResponseEntity<>(questionDao.findByCategory(category1),HttpStatus.OK);
         }
         catch(Exception e)
         {
@@ -102,9 +108,10 @@ public class QuestionService {
         }
     }
 
-    public ResponseEntity<List<Integer>> getQuestionsForQuiz(String category, int numberOfQuestions) {
+    public ResponseEntity<List<Integer>> getQuestionsForQuiz(int category, int numberOfQuestions) {
         try {
-            List<Integer> questionList = questionDao.findRandomQuestionsByCategory(category,numberOfQuestions);
+            Category category1 = categoryDao.findById(category).get();
+            List<Integer> questionList = questionDao.findRandomQuestionsByCategory(category1,numberOfQuestions);
 
             return new ResponseEntity<>(questionList, HttpStatus.OK);
         }
