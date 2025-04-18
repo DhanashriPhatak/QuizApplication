@@ -172,4 +172,16 @@ public class QuestionService {
             return new ResponseEntity<>(0,HttpStatus.BAD_REQUEST);
         }
     }
+
+    public ResponseEntity<List<Category>> getAllCategories() {
+        try{
+           List<Category> categories = categoryDao.findAll();
+           return new ResponseEntity<>(categories,HttpStatus.OK);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return new ResponseEntity<>(new ArrayList<>(),HttpStatus.BAD_REQUEST);
+        }
+    }
 }

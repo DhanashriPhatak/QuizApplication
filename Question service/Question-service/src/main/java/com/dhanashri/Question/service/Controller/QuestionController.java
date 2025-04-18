@@ -1,5 +1,6 @@
 package com.dhanashri.Question.service.Controller;
 
+import com.dhanashri.Question.service.Module.Category;
 import com.dhanashri.Question.service.Module.Question;
 import com.dhanashri.Question.service.Module.QuestionWrapper;
 import com.dhanashri.Question.service.Module.Response;
@@ -60,8 +61,17 @@ public class QuestionController {
     @GetMapping("getAllQuestions")
     public ResponseEntity<List<Question>> getAllQuestions()
     {
-        System.out.println("inside method");
         return questionService.getAllQuestions();
+    }
+
+    /*
+    Description: Get List of all categories available in Database
+     */
+
+    @GetMapping("getAllCategories")
+    public ResponseEntity<List<Category>> getAllCategories()
+    {
+        return questionService.getAllCategories();
     }
 
     /*
