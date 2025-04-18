@@ -31,8 +31,16 @@ import React from 'react';
                                                 {q.isActive ? '✅' : '❌'} {q.isActive ? 'Active' : 'Inactive'}
                                             </span>
 
-                                            <span className="d-flex align-items-center gap-1 text-black fw-medium">
+                                            {/* <span className="d-flex align-items-center gap-1 text-black fw-medium">
                                                 📶 {q.diff_level}
+                                            </span> */}
+                                            <span className={`badge rounded-pill px-3 py-2 text-white fw-semibold shadow-sm ${
+                                                q.diff_level === 'Easy' ? 'bg-success' :
+                                                q.diff_level === 'Medium' ? 'bg-warning text-dark' :
+                                                'bg-danger'
+                                            }`}  style={{ fontSize: '0.75rem', padding: '0.35rem 0.6rem' }}>
+                                                <i className="bi bi-lightning-charge-fill" style={{ fontSize: '0.85rem' }}></i>
+                                                {q.diff_level}
                                             </span>
                                         </div>
                                     </div>
@@ -40,11 +48,24 @@ import React from 'react';
                             {/* To show your options and answer*/}
                             <div id={collapseId} className="accordion-collapse collapse" data-bs-parent={`#${accordionId}`}>
                                 <div className="accordion-body"> 
-                                    1. {q.option_1} <br></br>
-                                    2. {q.option_2} <br></br>
-                                    3. {q.option_3} <br></br>
-                                    4. {q.option_4} <br></br>
-                                     <strong>Ans:-</strong> {q.ans}
+                                    {[q.option_1,q.option_2,q.option_3,q.option_4].map((option,idx)=>{
+                                        const optionNumber = idx+1;
+                                        const isCorrect = option===q.ans;
+
+                                        return(
+                                            <div key={idx} className="d-flex justify-content-between align-items-center gap-2 py-1 px-2 border rounded mb-2"
+                                            style={{backgroundColor:isCorrect?'#e6ffed' : 'transparent',}}
+                                            >
+                                                <span className="me-1">{optionNumber}</span>
+                                                <span className="flex-grow-1">{option}</span>
+                                                {isCorrect && (
+                                                    <span className="text-success fs-5">
+                                                        <i className="bi bi-check-circle-fill"></i>
+                                                    </span>
+                                                )}
+                                            </div>
+                                        )
+                                    })}
                                 </div>
                             </div>
                         </div>

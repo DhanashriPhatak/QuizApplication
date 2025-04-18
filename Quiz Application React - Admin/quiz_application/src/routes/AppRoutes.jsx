@@ -5,6 +5,7 @@ import QuestionsPage from '../pages/QuestionsPage';
 import AddEditQuestionPage from '../pages/AddEditQuestionPage';
 import NotFoundPage from '../pages/NotFoundPage';
 import GenerateQuizPage from '../pages/GenerateQuizPage';
+import CategoriesPage from '../pages/CategoriesPage';
 
 const AppRoutes = () => {
     return (
@@ -16,6 +17,7 @@ const AppRoutes = () => {
           <Route path="questions" element={<QuestionsPage />} />
           <Route path="questions/add" element={<AddEditQuestionPage mode="add" />} />
           <Route path="questions/edit/:id" element={<AddEditQuestionPage mode="edit" />} />
+          <Route path="categories" element={<CategoriesPage/>} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

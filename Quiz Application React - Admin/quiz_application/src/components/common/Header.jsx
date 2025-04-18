@@ -1,12 +1,23 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 
 const Header = () => {
+  useEffect(()=>{
+    const sidebar = document.querySelector('[data-widget="pushmenu"]');
+    if(sidebar)
+    {
+      sidebar.addEventListener("click",()=>{
+        document.body.classList.toggle("sidebar-collapse");
+      })
+    }
+  },[]);
   return (
     <>
      <nav className="app-header navbar navbar-expand bg-body"> {/*begin::Container*/}
   <div className="container-fluid"> {/*begin::Start Navbar Links*/}
     <ul className="navbar-nav">
-      <li className="nav-item"> <a className="nav-link" data-lte-toggle="sidebar" href="#" role="button"> <i className="bi bi-list" /> </a> </li>
+      <li className="nav-item"> 
+        <a className="nav-link" data-widget="pushmenu" data-lte-toggle="sidebar" href="#" role="button"> 
+        <i className="bi bi-list" /> </a> </li>
       <li className="nav-item d-none d-md-block"> <a href="#" className="nav-link">Home</a> </li>
       <li className="nav-item d-none d-md-block"> <a href="#" className="nav-link">Contact</a> </li>
     </ul> {/*end::Start Navbar Links*/} {/*begin::End Navbar Links*/}
