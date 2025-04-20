@@ -64,15 +64,7 @@ public class QuestionController {
         return questionService.getAllQuestions();
     }
 
-    /*
-    Description: Get List of all categories available in Database
-     */
 
-    @GetMapping("getAllCategories")
-    public ResponseEntity<List<Category>> getAllCategories()
-    {
-        return questionService.getAllCategories();
-    }
 
     /*
     Description:- To get Questions by category

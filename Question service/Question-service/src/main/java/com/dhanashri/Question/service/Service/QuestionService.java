@@ -173,15 +173,5 @@ public class QuestionService {
         }
     }
 
-    public ResponseEntity<List<Category>> getAllCategories() {
-        try{
-           List<Category> categories = categoryDao.findAll();
-           return new ResponseEntity<>(categories,HttpStatus.OK);
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-            return new ResponseEntity<>(new ArrayList<>(),HttpStatus.BAD_REQUEST);
-        }
-    }
+
 }
