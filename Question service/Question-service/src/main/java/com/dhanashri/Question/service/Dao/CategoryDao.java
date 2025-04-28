@@ -20,8 +20,9 @@ public interface CategoryDao extends JpaRepository<Category,Integer> {
         COUNT(CASE WHEN q.is_active = 1 THEN 1 END) as active,
         COUNT(CASE WHEN q.is_active = 0 THEN 1 END) as inactive
     FROM question q
-    JOIN category c ON q.category_id = c.id
+    RIGHT JOIN category c ON q.category_id = c.id
     GROUP BY c.id, c.category
+    ORDER BY COUNT(q.id) DESC
 """, nativeQuery = true)
     List<CategoryStatsResponse> getCategoryStats();
 }

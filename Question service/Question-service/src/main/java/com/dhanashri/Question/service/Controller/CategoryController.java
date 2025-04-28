@@ -7,9 +7,7 @@ import com.dhanashri.Question.service.Service.CategoryService;
 import com.netflix.discovery.converters.Auto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -20,19 +18,24 @@ public class CategoryController {
     @Autowired
     private CategoryService categoryService;
 
-
-    /*
-    Description: Get List of all categories available in Database
-     */
+    /**    Description: Get List of all categories available in Database    */
     @GetMapping("getAllCategories")
     public ResponseEntity<List<Category>> getAllCategories()
     {
         return categoryService.getAllCategories();
     }
 
+    /** Description: This is to get category Stats*/
     @GetMapping("getCategoryStats")
     public ResponseEntity<List<CategoryStatsResponse>> getCategoryStats()
     {
         return categoryService.getCategoryStats();
+    }
+
+    /** Description:- This is to Add a category*/
+    @PostMapping("add")
+    public ResponseEntity<String> addCategory(@RequestBody Category category)
+    {
+        return  categoryService.addCategory(category);
     }
 }

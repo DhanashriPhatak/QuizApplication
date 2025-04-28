@@ -46,4 +46,17 @@ public class CategoryService {
         }
 
     }
+
+    public ResponseEntity<String> addCategory(Category category) {
+        try{
+            System.out.println(category.getCategory());
+            categoryDao.save(category);
+            return new ResponseEntity<>("Success", HttpStatus.OK);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return new ResponseEntity<>("Error Occurred while saving the Category",HttpStatus.BAD_REQUEST);
+        }
+    }
 }
