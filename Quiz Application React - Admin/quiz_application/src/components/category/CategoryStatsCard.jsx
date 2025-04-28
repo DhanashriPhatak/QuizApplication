@@ -1,7 +1,10 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
+import { deleteCategory } from '../../services/QuestionService';
+import ShowToast from '../common/ShowToast';
 
-const CategoryStatsCard = ({data}) => {
+const CategoryStatsCard = ({data,setRefreshCategories}) => {
     const [showDetails,setShowDetails] = useState(false);
+    const[showConfirmModal,setShowConfirmModal] = useState(false);
     const {
         categoryId,
         categoryName,
@@ -18,9 +21,22 @@ const CategoryStatsCard = ({data}) => {
     }
 
     const handleDelete = () =>{
-
+        setShowConfirmModal(true);
     }
 
+    const handleDeleteConfirmed = async()=>{
+        deleteCategory(categoryId)
+        .then((res)=>{
+            console.log(res.data);
+            setShowConfirmModal(false);
+            setRefreshCategories(prev => !prev);
+            ShowToast({ type: 'success', title: 'Success', message: 'Category Deleted successfully!' });
+        })
+        .catch(error=>{
+            console.log("error:-"+error);
+            ShowToast({type:'error',title:'Error',message:'Failed to delete category. Please try again.'});
+        });
+    };
 
     return (
         <>
@@ -90,7 +106,31 @@ const CategoryStatsCard = ({data}) => {
                         </div>
                     )}
                 </div>
-            </div> 
+            </div>
+            {showConfirmModal && (
+            <div className="modal fade show d-block" tabIndex="-1" role="dialog" style={{backgroundColor:'rgba(0,0,0,0.5)'}}>
+                <div className="modal-dialog" role="document">
+                <div className="modal-content">
+                    
+                    <div className="modal-header bg-danger text-white">
+                    <h5 className="modal-title">Confirm Delete</h5>
+                    <button type="button" className="btn-close" onClick={() => setShowConfirmModal(false)}></button>
+                    </div>
+
+                    <div className="modal-body">
+                    Deleting this category will also delete <strong>{totalQuestions}</strong> questions.<br/>
+                    Are you sure you want to continue?
+                    </div>
+
+                    <div className="modal-footer">
+                    <button type="button" className="btn btn-secondary" onClick={() => setShowConfirmModal(false)}>Cancel</button>
+                    <button type="button" className="btn btn-danger" onClick={handleDeleteConfirmed}>Yes, Delete</button>
+                    </div>
+
+                </div>
+                </div>
+            </div>
+            )}
         </>
     )
 };

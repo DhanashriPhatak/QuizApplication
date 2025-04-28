@@ -45,7 +45,7 @@ const CategoriesPage = () => {
             </div>
           </CSSTransition>
           <div className="mt-4">  
-            <CategoriesStats refreshCategories={refreshCategories}/>
+            <CategoriesStats refreshCategories={refreshCategories} setRefreshCategories={setRefreshCategories}/>
           </div>
     </main>
     </>

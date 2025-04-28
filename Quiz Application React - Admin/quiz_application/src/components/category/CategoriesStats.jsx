@@ -3,7 +3,7 @@ import Spinner from '../common/Spinner';
 import CategoryStatsCard from './CategoryStatsCard';
 import { getCategoryStats } from '../../services/QuestionService';
 
-const CategoriesStats = ({refreshCategories}) => {
+const CategoriesStats = ({refreshCategories, setRefreshCategories}) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [categoryStats,setCategoryStats] = useState([]);
@@ -35,6 +35,7 @@ const CategoriesStats = ({refreshCategories}) => {
               <CategoryStatsCard
                 key={index}
                 data={category}
+                setRefreshCategories ={setRefreshCategories}
               ></CategoryStatsCard>
             )
           })
