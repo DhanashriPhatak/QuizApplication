@@ -59,4 +59,15 @@ public class CategoryService {
             return new ResponseEntity<>("Error Occurred while saving the Category",HttpStatus.BAD_REQUEST);
         }
     }
+
+    public ResponseEntity<String> deleteCategory(int categoryId) {
+        try{
+            categoryDao.deleteById(categoryId);
+            return new ResponseEntity<>("Success",HttpStatus.OK);
+        }
+        catch(Exception e)
+        {
+            return new ResponseEntity<>("Error occured while deleting Category",HttpStatus.BAD_REQUEST);
+        }
+    }
 }

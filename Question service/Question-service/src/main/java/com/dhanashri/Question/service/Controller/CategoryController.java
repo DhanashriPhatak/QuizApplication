@@ -38,4 +38,11 @@ public class CategoryController {
     {
         return  categoryService.addCategory(category);
     }
+
+    /** Description:- This is to Delete a category*/
+    @PostMapping("deleteCategory/{categoryId}")
+    public ResponseEntity<String> deleteCategory(@PathVariable int categoryId)
+    {
+        return  categoryService.deleteCategory(categoryId);
+    }
 }

@@ -27,4 +27,6 @@ public class Question {
     private String ans;
     private int isActive;
 
+
+
 }
