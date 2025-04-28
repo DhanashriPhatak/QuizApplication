@@ -276,5 +276,39 @@
         );
         sparkline3.render();
     </script> end::Script -->
+    <!-- Add this near end of body -->
+    <div id="dynamicToast" class="toast position-fixed bottom-0 end-0 m-3 hide" role="alert" aria-live="assertive" aria-atomic="true">
+        <div id="toastHeader" class="toast-header">
+          <i id="toastIcon" class="me-2"></i>
+          <strong id="toastTitle" class="me-auto"></strong>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div id="toastBody" class="toast-body"></div>
+      </div>
+      
+    <!-- <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="successToast" class="toast toast-success" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <i class="bi bi-check-circle-fill text-success me-2"></i>
+            <strong class="me-auto">Success</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            Category added successfully!
+        </div>
+        </div>
+    
+        <div id="errorToast" class="toast toast-danger" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
+            <strong class="me-auto">Error</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            Failed to add category. Please try again.
+        </div>
+        </div>
+    </div> -->
+    
   </body>
 </html>

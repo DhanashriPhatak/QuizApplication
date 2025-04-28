@@ -1,8 +1,8 @@
 import React from 'react';
-import Spinner from './common/Spinner';
+import Spinner from '../common/Spinner';
 import { useState,useEffect } from 'react';
-import AccordianList from './question/AccordionList';
-import { getQuestionsByCategory } from '../services/QuestionService';
+import AccordianList from './AccordionList';
+import { getQuestionsByCategory } from '../../services/QuestionService';
 
 const  Questions = ({categoryId,categoryName}) => {
   const [loading, setLoading] = useState(true);

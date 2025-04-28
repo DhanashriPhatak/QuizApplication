@@ -5,7 +5,6 @@ const GenerateQuizPage = () => {
   // console.log("✅ GenerateQuizPage loaded");
   return (
     <>
-   
     <GenerateQuiz></GenerateQuiz>
     </>
   )

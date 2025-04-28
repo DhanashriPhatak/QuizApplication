@@ -1,5 +1,5 @@
 import React, { useEffect,useState } from 'react';
-import Questions from '../components/Questions';
+import Questions from '../components/question/Questions';
 import { getAllCategories } from '../services/QuestionService';
 import Spinner from '../components/common/Spinner';
 
