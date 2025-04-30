@@ -40,9 +40,17 @@ public class CategoryController {
     }
 
     /** Description:- This is to Delete a category*/
-    @PostMapping("deleteCategory/{categoryId}")
+    @DeleteMapping("/{categoryId}")
     public ResponseEntity<String> deleteCategory(@PathVariable int categoryId)
     {
         return  categoryService.deleteCategory(categoryId);
     }
+
+    /** Description:- This is to Update a category*/
+    @PutMapping("/{categoryId}")
+    public ResponseEntity<String> deleteCategory(@PathVariable int categoryId, @RequestBody Category updatedCategory)
+    {
+        return  categoryService.updateCategory(categoryId,updatedCategory);
+    }
+
 }

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CategoryService {
@@ -68,6 +69,26 @@ public class CategoryService {
         catch(Exception e)
         {
             return new ResponseEntity<>("Error occured while deleting Category",HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public ResponseEntity<String> updateCategory(int categoryId, Category updatedCategory) {
+        try{
+            Optional<Category> existingCategoryOpt = categoryDao.findById(categoryId);
+            if(existingCategoryOpt.isPresent())
+            {
+                Category existingCategory = existingCategoryOpt.get();
+                existingCategory.setCategory(updatedCategory.getCategory());
+                categoryDao.save(existingCategory);
+                return new ResponseEntity<>("Category Updated Successfully",HttpStatus.OK);
+            }
+            else {
+                return new ResponseEntity<>("Category not found", HttpStatus.NOT_FOUND);
+            }
+        }
+        catch(Exception e)
+        {
+            return new ResponseEntity<>("Error occured while updating Category",HttpStatus.BAD_REQUEST);
         }
     }
 }
