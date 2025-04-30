@@ -17,4 +17,11 @@ export const addCategory = (category)=>
                'Content-Type' :'application/json'
           },
      withCredentials:true});
-export const deleteCategory = (categoryId)=> axios.post(`${CATEGORY_BASE_URL}/deleteCategory/${categoryId}`, {withCredentials:true});
+export const deleteCategory = (categoryId)=> axios.delete(`${CATEGORY_BASE_URL}/${categoryId}`, {withCredentials:true});
+export const updateCategory = (id,category)=> axios.put(`${CATEGORY_BASE_URL}/${id}`, category,{
+     headers:{
+          'Content-Type':'application/json'
+     },
+     withCredentials:true});
+
+console.log("deleteCategory:-"+deleteCategory);

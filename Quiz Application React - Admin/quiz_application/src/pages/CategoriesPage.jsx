@@ -6,6 +6,8 @@ import '../css/categoryFormTransition.css';
 
 const CategoriesPage = () => {
   const [showForm,setShowForm] = useState(false);
+  const [formMode,setformMode] = useState('add');
+  const [editCategoryData,setEditCategoryData] = useState(null);
   const nodeRef = useRef(null);
   const [refreshCategories,setRefreshCategories] = useState(false);
 
@@ -17,12 +19,22 @@ const CategoriesPage = () => {
             <div className="row">
               <div className="col-sm-6">{/*  */}
                 <h3 className="mb-0">
-                  {showForm ? "Add New Category": "List of All Categories"}
+                  {showForm ? 
+                  (formMode==='add'?"Add New Category" :"Update Category")
+                  : "List of All Categories"
+                  }
                   </h3>{/* mb-0 */}
               </div>
               <div className="col-sm-6 d-flex justify-content-end mb-3">
                 {/* <Link to="/questions/add" className="btn btn-primary"> */}
-                  <button className="btn btn-outline-dark " onClick={() => setShowForm(!showForm)}>
+                  <button className="btn btn-outline-dark " onClick={() => {
+                    if(!showForm)
+                    {
+                      setformMode('add');
+                      setEditCategoryData(null);
+                    }
+                    setShowForm(!showForm)
+                  }}>
                   {showForm ? <i className="bi bi-arrow-left me-2"></i> : <i className="bi bi-plus-circle me-1"></i>}
                   {showForm ? "Back to Stats" : "Add New Category"}
                   </button>
@@ -41,11 +53,20 @@ const CategoriesPage = () => {
             <div ref={nodeRef}>
               <AddCategory 
               setShowForm={setShowForm}
-              setRefreshCategories={setRefreshCategories}/>
+              setRefreshCategories={setRefreshCategories}
+              formMode={formMode}
+              editCategoryData={editCategoryData}
+              />
             </div>
           </CSSTransition>
           <div className="mt-4">  
-            <CategoriesStats refreshCategories={refreshCategories} setRefreshCategories={setRefreshCategories}/>
+            <CategoriesStats 
+            refreshCategories={refreshCategories} 
+            setRefreshCategories={setRefreshCategories}
+            setformMode = {setformMode}
+            setEditCategoryData ={setEditCategoryData}
+            setShowForm ={setShowForm}
+            />
           </div>
     </main>
     </>

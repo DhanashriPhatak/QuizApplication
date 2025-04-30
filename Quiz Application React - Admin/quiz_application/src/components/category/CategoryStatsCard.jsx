@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { deleteCategory } from '../../services/QuestionService';
 import ShowToast from '../common/ShowToast';
 
-const CategoryStatsCard = ({data,setRefreshCategories}) => {
+const CategoryStatsCard = ({data,setRefreshCategories,setformMode, setEditCategoryData, setShowForm}) => {
     const [showDetails,setShowDetails] = useState(false);
     const[showConfirmModal,setShowConfirmModal] = useState(false);
     const {
@@ -17,7 +17,12 @@ const CategoryStatsCard = ({data,setRefreshCategories}) => {
       } = data;
 
     const handleEdit = ()=>{
-        
+        setEditCategoryData({
+            id:categoryId,
+            category:categoryName
+        })
+        setformMode('edit');
+        setShowForm(true);
     }
 
     const handleDelete = () =>{
