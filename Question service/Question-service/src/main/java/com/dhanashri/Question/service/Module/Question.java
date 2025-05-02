@@ -1,5 +1,8 @@
 package com.dhanashri.Question.service.Module;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,6 +20,7 @@ public class Question {
 
     @ManyToOne
     @JoinColumn(name = "category_id", referencedColumnName = "id")
+    @JsonIgnoreProperties({"questions"})
     private Category category;
     private String diff_level;
     private String question;
@@ -27,6 +31,13 @@ public class Question {
     private String ans;
     private int isActive;
 
+    @JsonProperty("category_id")
+    public int getCategoryId() {
+        return category != null ? category.getId() : -1;
+    }
 
-
+    @JsonProperty("category")
+    public String getCategoryName() {
+        return category != null ? category.getCategory() : null;
+    }
 }
