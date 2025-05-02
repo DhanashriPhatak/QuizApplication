@@ -11,13 +11,14 @@ const  Questions = ({categoryId,categoryName}) => {
   const [showQuestion,setShowQuestion] = useState(false);
   const [fetched,setFetched] = useState(false);//prevent refetch
   
-  console.log("category in quesiton:-"+categoryId);
+  // console.log("category in quesiton:-"+categoryId);
   useEffect(()=>{
     if(showQuestion && !fetched)
     {
       setLoading(true);
       getQuestionsByCategory(categoryId).
       then(res=>{
+        console.log("data :-",res.data);
         setQuestions(res.data);
         setFetched(true);
         setLoading(false);
@@ -50,6 +51,7 @@ const  Questions = ({categoryId,categoryName}) => {
                       ) : (
                         <AccordianList 
                         questions={questions}
+                        categoryId={categoryId}
                         categoryName={categoryName}
                         />
                     )}

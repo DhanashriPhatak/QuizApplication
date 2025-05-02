@@ -2,17 +2,19 @@ import React, { useEffect,useState } from 'react';
 import Questions from '../components/question/Questions';
 import { getAllCategories } from '../services/QuestionService';
 import Spinner from '../components/common/Spinner';
+import AddQuestionModal from '../components/question/AddQuestionModal';
 
 function QuestionsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [categories,setCategories] = useState([]);
-  // const [groupedQuestions, setGroupedQuestions] = useState({});
+  const [showModal,setShowModal] = useState(false);
   
   useEffect(()=>{
     setLoading(true);
     getAllCategories()
     .then((res)=>{
+      console.log(res.data);
       setCategories(res.data);
       setLoading(false);
     })
@@ -33,7 +35,7 @@ function QuestionsPage() {
               </div>
               <div className="col-sm-6 d-flex justify-content-end mb-3">
                 {/* <Link to="/questions/add" className="btn btn-primary"> */}
-                  <button className="btn btn ">
+                  <button className="btn btn" onClick={()=>setShowModal(true)}>
                   <i className="bi bi-plus-circle me-1"></i> Add New Question
                   </button>
                 {/* </Link> */}
@@ -56,6 +58,7 @@ function QuestionsPage() {
           })
         )}
       </main>
+      <AddQuestionModal show={showModal} onClose={()=>setShowModal(false)}></AddQuestionModal>
     </>
   )
 }

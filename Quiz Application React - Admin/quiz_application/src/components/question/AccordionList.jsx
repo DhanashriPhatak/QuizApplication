@@ -1,7 +1,7 @@
 import React from 'react';
 
-  const AccordionList = ({ questions = [] ,categoryName}) => {
-//   console.log("question d:-",quesitons);
+  const AccordionList = ({ questions = [] ,categoryId,categoryName}) => {
+  console.log("question d:-",questions);
     const accordionId = `accordion-${categoryName.replace(/\s+/g,"-").toLowerCase()}`;
     /*
         /.../ -> delimiter that defines regex pattern
@@ -14,8 +14,8 @@ import React from 'react';
         <>
             <div className="accordion" id={accordionId}>
                 {questions.map((q,index)=>{
-                    const collapseId =  `collapse-${q.category.id}-${index}`;
-                    const headingId = `heading-${q.category.id}-${index}`;
+                    const collapseId =  `collapse-${categoryId}-${index}`;
+                    const headingId = `heading-${categoryId}-${index}`;
                     return (
                         <div className="accordion-item" key={index}>
                             <h2 className="accordion-header" id={headingId}> 

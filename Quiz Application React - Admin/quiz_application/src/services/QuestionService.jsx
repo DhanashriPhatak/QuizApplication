@@ -24,4 +24,4 @@ export const updateCategory = (id,category)=> axios.put(`${CATEGORY_BASE_URL}/${
      },
      withCredentials:true});
 
-console.log("deleteCategory:-"+deleteCategory);
+console.log("getAllCategories.:-",CATEGORY_BASE_URL);
