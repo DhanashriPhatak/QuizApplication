@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import '../../css/addQuestionModal.css';
-import { getAllCategories } from '../../services/QuestionService';
+import { addQuestion, getAllCategories } from '../../services/QuestionService';
 import Spinner from '../common/Spinner';
+import ShowToast from '../common/ShowToast';
 
 const AddQuestionModal = ({show,onClose}) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [validated,setValidated] = useState(false);
+  const [submitting,setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     question: '',
     optionA: '',
@@ -65,12 +67,35 @@ const AddQuestionModal = ({show,onClose}) => {
         errorCopy.optionC ="Option C is required.";
         valid = false;
       }
-      if(errorCopy.optionD.trim().length > 0)
+      if(formData.optionD.trim().length > 0)
       {
         errorCopy.optionD = "";
       }
       else{
         errorCopy.optionD = "Option D is required.";
+        valid = false;
+      }
+      if(formData.category.trim().length >0 )
+      {
+        errorCopy.category="";
+      }
+      else{
+        errorCopy.category = "Category is Required";
+        valid = false;
+      }
+      if(formData.diffLevel.trim().length > 0)
+      {
+        errorCopy.diffLevel = "";
+      }else{
+        errorCopy.diffLevel = "Difficulty Level is Requierd";
+        valid=false;
+      }
+      if(formData.correctAnswer.trim().length > 0)
+      {
+        errorCopy.correctAnswer = "";
+      }
+      else{
+        errorCopy.correctAnswer = "Answer is Required";
         valid = false;
       }
       setFormErrors(errorCopy);
@@ -89,12 +114,39 @@ const AddQuestionModal = ({show,onClose}) => {
     const handleSubmit = (e)=>{
       e.preventDefault();
       setValidated(true);
-
+      const payload = {
+        question: formData.question,
+        option_a: formData.optionA,
+        option_b: formData.optionB,
+        option_c: formData.optionC,
+        option_d: formData.optionD,
+        ans: formData[formData.correctAnswer], 
+        diff_level: formData.diffLevel,
+        isActive: 1,
+        category: {
+          id: categories.find(cat => cat.category === formData.category)?.id
+        }
+      };
+      // console.log("inside handle submit",validateForm());
       if(validateForm()){
-
+        setSubmitting(true);
+        console.log("inside validate form",formData);
+        addQuestion(payload)
+        .then((res)=>{
+          console.log(res.data);
+          setSubmitting(false);
+          onClose();
+          ShowToast({ type: 'success', title: 'Success', message: 'Question Added successfully!' });
+        })
+        .catch((error)=>{
+          console.error(error);
+          setSubmitting(false);
+          ShowToast({type:'error',title:'Error',message:'Failed to Add a Question. Please try again.'});
+        })
       }
     }
 
+    /**Set the categories dropdown dynamically */
     const [categories,setCategories] = useState([]);
     useEffect(()=>{
       getAllCategories()
@@ -108,6 +160,34 @@ const AddQuestionModal = ({show,onClose}) => {
       })
     },[]);
 
+    /** reset form on close */
+    const resetForm = () => {
+      setFormData({
+        question: '',
+        optionA: '',
+        optionB: '',
+        optionC: '',
+        optionD: '',
+        category: '',
+        diffLevel: '',
+        correctAnswer: ''
+      });
+      setFormErrors({
+        question: '',
+        optionA: '',
+        optionB: '',
+        optionC: '',
+        optionD: '',
+        category: '',
+        diffLevel: '',
+        correctAnswer: ''
+      });
+      setValidated(false);
+    };
+    const handleClose = ()=>{
+      resetForm();
+      onClose();
+    };
   return (
     <>
       {show && (
@@ -118,7 +198,7 @@ const AddQuestionModal = ({show,onClose}) => {
                 {/* Modal Header */}
                 <div className="modal-header">
                   <h5 className="modal-title">Add New Question</h5>
-                  <button type="button" className="btn-close" onClick={onClose}></button>
+                  <button type="button" className="btn-close" onClick={handleClose}></button>
                 </div>
                 {/* Modal Body */}
                 <form className={`needs-validation ${validated?'was-validated':''}`} noValidate 
@@ -240,12 +320,14 @@ const AddQuestionModal = ({show,onClose}) => {
                       </div>
                     </div>
                   </div>
-                </form>
+                
                 {/* Modal Footer */}
                 <div className="modal-footer">
-                  <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
-                  <button className="btn btn-primary">Save Question</button>
+                  <button className="btn btn-secondary" onClick={handleClose}>Cancel</button>
+                  <button className="btn btn-primary" type="submit" disabled={submitting}>
+                    {submitting?<Spinner></Spinner> :'Save Question'}</button>
                 </div>
+                </form>
               </div>
             </div>
           </div>

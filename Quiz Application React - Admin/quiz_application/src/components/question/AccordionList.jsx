@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
+import Switch from "react-switch";
+import { toggleQuestion } from '../../services/QuestionService';
+import ShowToast from '../common/ShowToast';
+import Spinner from '../common/Spinner';
 
-  const AccordionList = ({ questions = [] ,categoryId,categoryName}) => {
-  console.log("question d:-",questions);
+  const AccordionList = ({ questions = [] ,categoryId,categoryName,setQuestions}) => {
     const accordionId = `accordion-${categoryName.replace(/\s+/g,"-").toLowerCase()}`;
     /*
         /.../ -> delimiter that defines regex pattern
@@ -9,7 +12,29 @@ import React from 'react';
         + -> Matches one or more of the preceding token (in this case, whitespace)
         g -> Global flag - replaces all matches ,not just the first
     */
-    
+   const [updatingId,setUpdatingId] = useState(null);
+    const handleToggle = (id,currentStatus)=>{
+        setUpdatingId(id);
+        toggleQuestion(id)
+        .then((res)=>{
+            const updatedStatus = currentStatus === 1 ? 0 : 1;
+            setQuestions(prevQuestions =>
+                prevQuestions.map(q =>
+                q.id === id ? { ...q, isActive: updatedStatus } : q
+                )
+            );
+            console.log("questions:-",questions);
+            const status = currentStatus===0 ? 'ACTIVE' : 'INACTIVE';
+            const msg = `Question marked as ${status}`;
+            ShowToast({ type: 'success', title: 'Success', message: msg });
+        })
+        .catch((error)=>{
+            ShowToast({type:'error',title:'Error',message:'Failed to Toggle the status of a Question. Please try again.'});
+        })
+        .finally(() => {
+            setUpdatingId(null);
+        });
+    }
     return (
         <>
             <div className="accordion" id={accordionId}>
@@ -27,10 +52,23 @@ import React from 'react';
                                         <span className="text-start">{q.question}</span>
                                         {/*For badge printing active/inactive & diff level */}
                                         <div className="d-flex align-items-center gap-3">
-                                            <span className="d-flex align-items-center gap-1 text-black fw-medium">
+                                            {/* <span className="d-flex align-items-center gap-1 text-black fw-medium">
                                                 {q.isActive ? '✅' : '❌'} {q.isActive ? 'Active' : 'Inactive'}
+                                            </span> */}
+                                            {updatingId === q.id ? (
+                                            <Spinner /> 
+                                            ) :
+                                            (<span title={q.isActive ? "Active" : "Inactive"}>
+                                            <Switch
+                                                checked={q.isActive === 1}
+                                                onChange={() => handleToggle(q.id,q.isActive)}
+                                                onColor="#00C851"
+                                                offColor="#ff4444"
+                                                uncheckedIcon={false}
+                                                checkedIcon={false}
+                                                />
                                             </span>
-
+                                            )}
                                             {/* <span className="d-flex align-items-center gap-1 text-black fw-medium">
                                                 📶 {q.diff_level}
                                             </span> */}
@@ -48,7 +86,7 @@ import React from 'react';
                             {/* To show your options and answer*/}
                             <div id={collapseId} className="accordion-collapse collapse" data-bs-parent={`#${accordionId}`}>
                                 <div className="accordion-body"> 
-                                    {[q.option_1,q.option_2,q.option_3,q.option_4].map((option,idx)=>{
+                                    {[q.option_a,q.option_b,q.option_c,q.option_d].map((option,idx)=>{
                                         const optionNumber = idx+1;
                                         const isCorrect = option===q.ans;
 

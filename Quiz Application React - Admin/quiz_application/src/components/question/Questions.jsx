@@ -53,6 +53,7 @@ const  Questions = ({categoryId,categoryName}) => {
                         questions={questions}
                         categoryId={categoryId}
                         categoryName={categoryName}
+                        setQuestions={setQuestions}
                         />
                     )}
                   </div>

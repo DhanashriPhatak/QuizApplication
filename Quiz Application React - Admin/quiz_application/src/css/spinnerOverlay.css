@@ -1,0 +1,14 @@
+.spinner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1050; /* above modals, adjust if needed */
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4); /* semi-transparent gray */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: all; /* block clicks */
+  }
+  
