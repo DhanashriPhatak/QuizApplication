@@ -24,10 +24,10 @@ public class Question {
     private Category category;
     private String diff_level;
     private String question;
-    private String option_1;
-    private String option_2;
-    private String option_3;
-    private String option_4;
+    private String option_a;
+    private String option_b;
+    private String option_c;
+    private String option_d;
     private String ans;
     private int isActive;
 

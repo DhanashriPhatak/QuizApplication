@@ -69,10 +69,10 @@ public class QuestionService {
 
             questionWrapper.setId(question.getId());
             questionWrapper.setQuestion(question.getQuestion());
-            questionWrapper.setOption_1(question.getOption_1());
-            questionWrapper.setOption_2(question.getOption_2());
-            questionWrapper.setOption_3(question.getOption_3());
-            questionWrapper.setOption_4(question.getOption_4());
+            questionWrapper.setOption_1(question.getOption_a());
+            questionWrapper.setOption_2(question.getOption_b());
+            questionWrapper.setOption_3(question.getOption_c());
+            questionWrapper.setOption_4(question.getOption_d());
             questionWrapper.setCategory(question.getCategory());
 
             return new ResponseEntity<>(questionWrapper,HttpStatus.OK);
@@ -137,10 +137,10 @@ public class QuestionService {
                 questionWrapper1.setId(q.getId());
                 questionWrapper1.setQuestion(q.getQuestion());
                 questionWrapper1.setCategory(q.getCategory());
-                questionWrapper1.setOption_1(q.getOption_1());
-                questionWrapper1.setOption_2(q.getOption_2());
-                questionWrapper1.setOption_3(q.getOption_3());
-                questionWrapper1.setOption_4(q.getOption_4());
+                questionWrapper1.setOption_1(q.getOption_a());
+                questionWrapper1.setOption_2(q.getOption_b());
+                questionWrapper1.setOption_3(q.getOption_c());
+                questionWrapper1.setOption_4(q.getOption_d());
 
                 questionWrapper.add(questionWrapper1);
             }
@@ -174,4 +174,24 @@ public class QuestionService {
     }
 
 
+    public ResponseEntity<?> toggleQuestionStatus(int id) {
+        try{
+            Optional<Question> optionalQuestion = questionDao.findById(id);
+            if(optionalQuestion.isPresent())
+            {
+                Question question = optionalQuestion.get();
+                question.setIsActive(question.getIsActive()==0?1:0);
+                questionDao.save(question);
+                return  new ResponseEntity<>(question,HttpStatus.OK);
+            }
+            else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Question not found");
+            }
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return new ResponseEntity<>("Failed to update the Question Status",HttpStatus.BAD_REQUEST);
+        }
+    }
 }

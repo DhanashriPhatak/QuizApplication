@@ -5,6 +5,7 @@ import com.dhanashri.Question.service.Module.Question;
 import com.dhanashri.Question.service.Module.QuestionWrapper;
 import com.dhanashri.Question.service.Module.Response;
 import com.dhanashri.Question.service.Service.QuestionService;
+import jakarta.ws.rs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -100,6 +101,13 @@ public class QuestionController {
     public ResponseEntity<Integer> getScore(@RequestBody List<Response> responses)
     {
         return questionService.getScore(responses);
+    }
+
+    /**This is to set Questions Active / Inactive */
+    @PutMapping("toggle/{id}")
+    public ResponseEntity<?> toggleQuestionStatus(@PathVariable int id)
+    {
+        return questionService.toggleQuestionStatus(id);
     }
 
 }
