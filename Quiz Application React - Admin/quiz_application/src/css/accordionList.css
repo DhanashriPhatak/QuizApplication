@@ -1,0 +1,8 @@
+.accordion-button {
+  box-shadow: none !important;
+  text-decoration: none !important;
+}
+
+.accordion-button:not(.collapsed) {
+  box-shadow: none !important;
+}

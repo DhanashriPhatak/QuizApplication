@@ -40,7 +40,7 @@ public class QuestionController {
     /*
     Description: To delete any question
      */
-    @DeleteMapping("deleteQuestion/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteQuesiton(@PathVariable int id)
     {
         return questionService.deleteQuestion(id);

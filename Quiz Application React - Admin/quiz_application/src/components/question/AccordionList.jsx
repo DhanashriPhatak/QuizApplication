@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import Switch from "react-switch";
-import { toggleQuestion } from '../../services/QuestionService';
+import { toggleQuestion ,deleteQuestion} from '../../services/QuestionService';
 import ShowToast from '../common/ShowToast';
 import Spinner from '../common/Spinner';
+import '../../css/accordionList.css';
 
   const AccordionList = ({ questions = [] ,categoryId,categoryName,setQuestions}) => {
     const accordionId = `accordion-${categoryName.replace(/\s+/g,"-").toLowerCase()}`;
@@ -35,6 +36,34 @@ import Spinner from '../common/Spinner';
             setUpdatingId(null);
         });
     }
+
+    const handleEdit = (e,q)=>{
+        e.stopPropagation();
+    }
+    const[showConfirmModal,setShowConfirmModal] = useState(false);
+    const [deleteTargetId,setDeleteTargetId] = useState(null);
+    const [deletingId,setDeletingId] = useState(null);
+    const handleDelete = (e,id) =>{
+        e.stopPropagation();
+        setDeleteTargetId(id);
+        setShowConfirmModal(true);
+    }
+    const handleDeleteConfirmed = ()=>{
+        setDeletingId(deleteTargetId);
+        deleteQuestion(deleteTargetId)
+        .then(()=>{
+            setQuestions(prev =>prev.filter(q=>q.id!==deleteTargetId));
+            ShowToast({type:'success',title:'Success',message:'Question deleted successfully.'})
+        })
+        .catch((error)=>{
+            ShowToast({ type: 'error', title: 'Error', message: 'Failed to delete question. Try again.' });
+        })
+        .finally(() => {
+            setDeletingId(null);
+            setDeleteTargetId(null);
+            setShowConfirmModal(false);
+        });
+    }
     return (
         <>
             <div className="accordion" id={accordionId}>
@@ -44,45 +73,66 @@ import Spinner from '../common/Spinner';
                     return (
                         <div className="accordion-item" key={index}>
                             <h2 className="accordion-header" id={headingId}> 
-                                <button className="accordion-button"
-                                 type="button" data-bs-toggle="collapse" data-bs-target={`#${collapseId}`} 
-                                 aria-expanded="true" aria-controls={collapseId}>
-                                    <div className="d-flex flex-wrap justify-content-between align-items-center w-100">
-                                        {/* To print question*/}
-                                        <span className="text-start">{q.question}</span>
+                                <div className="d-flex justify-content-between align-items-center w-100 px-3 py-2">
+                                    <button className="accordion-button flex-grow-1 mb-0"
+                                    type="button" data-bs-toggle="collapse" data-bs-target={`#${collapseId}`} 
+                                    aria-expanded="true" aria-controls={collapseId}
+                                    style={{ background: 'none', border: 'none', padding: 0 }}
+                                    >
+                                    <span className="text-start">{q.question}</span>
+                                    </button>
                                         {/*For badge printing active/inactive & diff level */}
-                                        <div className="d-flex align-items-center gap-3">
-                                            {/* <span className="d-flex align-items-center gap-1 text-black fw-medium">
-                                                {q.isActive ? '✅' : '❌'} {q.isActive ? 'Active' : 'Inactive'}
-                                            </span> */}
-                                            {updatingId === q.id ? (
-                                            <Spinner /> 
-                                            ) :
-                                            (<span title={q.isActive ? "Active" : "Inactive"}>
-                                            <Switch
-                                                checked={q.isActive === 1}
-                                                onChange={() => handleToggle(q.id,q.isActive)}
-                                                onColor="#00C851"
-                                                offColor="#ff4444"
-                                                uncheckedIcon={false}
-                                                checkedIcon={false}
-                                                />
-                                            </span>
-                                            )}
-                                            {/* <span className="d-flex align-items-center gap-1 text-black fw-medium">
-                                                📶 {q.diff_level}
-                                            </span> */}
-                                            <span className={`badge rounded-pill px-3 py-2 text-white fw-semibold shadow-sm ${
-                                                q.diff_level === 'Easy' ? 'bg-success' :
-                                                q.diff_level === 'Medium' ? 'bg-warning text-dark' :
-                                                'bg-danger'
-                                            }`}  style={{ fontSize: '0.75rem', padding: '0.35rem 0.6rem' }}>
-                                                <i className="bi bi-lightning-charge-fill" style={{ fontSize: '0.85rem' }}></i>
-                                                {q.diff_level}
-                                            </span>
+                                    <div className="d-flex align-items-center gap-3 ms-3">
+                                        {updatingId === q.id ? (
+                                        <Spinner /> 
+                                        ) :
+                                        (<span title={q.isActive ? "Active" : "Inactive"}>
+                                        <Switch
+                                            checked={q.isActive === 1}
+                                            onChange={() => handleToggle(q.id,q.isActive)}
+                                            onColor="#00C851"
+                                            offColor="#ff4444"
+                                            uncheckedIcon={false}
+                                            checkedIcon={false}
+                                            height={18}   
+                                            width={36} 
+                                            />
+                                        </span>
+                                        )}
+                                        <div className="dropdown">
+                                            <button
+                                                className="btn btn-sm btn-light border dropdown-toggle"
+                                                type="button"
+                                                data-bs-toggle="dropdown"
+                                                aria-expanded="false"
+                                                onClick={(e)=>e.stopPropagation()}
+                                            >
+                                                <i className="bi bi-gear-fill"></i>
+                                            </button>
+                                            <ul className="dropdown-menu">
+                                                <li>
+                                                <button className="dropdown-item" onClick={(e) => handleEdit(e,q)}>
+                                                    <i className="bi bi-pencil-square me-2 text-primary"></i> Edit
+                                                </button>
+                                                </li>
+                                                <li>
+                                                <button className="dropdown-item text-danger" onClick={(e) => handleDelete(e,q.id)}>
+                                                    <i className="bi bi-trash3 me-2"></i> Delete
+                                                </button>
+                                                </li>
+                                            </ul>
                                         </div>
+                                        <span className={`badge rounded-pill px-3 py-2 text-white fw-semibold shadow-sm ${
+                                            q.diff_level === 'Easy' ? 'bg-success' :
+                                            q.diff_level === 'Medium' ? 'bg-warning text-dark' :
+                                            'bg-danger'
+                                        }`}  style={{ fontSize: '0.75rem', padding: '0.35rem 0.6rem' }}>
+                                            <i className="bi bi-lightning-charge-fill" style={{ fontSize: '0.85rem' }}></i>
+                                            {q.diff_level}
+                                        </span>
                                     </div>
-                                </button> </h2>
+                                    </div>
+                                 </h2>
                             {/* To show your options and answer*/}
                             <div id={collapseId} className="accordion-collapse collapse" data-bs-parent={`#${accordionId}`}>
                                 <div className="accordion-body"> 
@@ -109,6 +159,31 @@ import Spinner from '../common/Spinner';
                         </div>
                     )
                 })}
+                {showConfirmModal && (
+                    <div className="modal fade show d-block" tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                        <div className="modal-dialog" role="document">
+                            <div className="modal-content">
+
+                                <div className="modal-header bg-danger text-white">
+                                    <h5 className="modal-title">Confirm Delete</h5>
+                                    <button type="button" className="btn-close" onClick={() => setShowConfirmModal(false)}></button>
+                                </div>
+
+                                <div className="modal-body">
+                                    Are you sure you want to delete this question?
+                                </div>
+
+                                <div className="modal-footer">
+                                    <button type="button" className="btn btn-secondary" onClick={() => setShowConfirmModal(false)}>Cancel</button>
+                                    <button type="button" className="btn btn-danger" onClick={handleDeleteConfirmed}>
+                                        {deletingId ? <Spinner /> : 'Yes, Delete'}
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </>
 )}

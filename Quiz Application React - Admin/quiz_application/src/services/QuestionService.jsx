@@ -13,6 +13,7 @@ export const addQuestion = (question)=>axios.post(`${QUESTION_BASE_URL}/add`,que
      },
      withCredentials:true});
 export const toggleQuestion = (id)=> axios.put(`${QUESTION_BASE_URL}/toggle/${id}`,{withCredentials:true});
+export const deleteQuestion = (id)=> axios.delete(`${QUESTION_BASE_URL}/${id}`,{withCredentials:true});
 
 /** Category Rest Endpoints */
 export const getAllCategories = () => axios.get(`${CATEGORY_BASE_URL}/getAllCategories`, {withCredentials: true});
