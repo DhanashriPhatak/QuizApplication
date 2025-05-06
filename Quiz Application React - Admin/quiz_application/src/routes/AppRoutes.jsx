@@ -11,7 +11,7 @@ const AppRoutes = () => {
 <BrowserRouter>
     <Routes>
         <Route path="/" element={<MainLayout />}>
-          <Route index element={<DashboardPage />} />
+          <Route index element={<NotFoundPage />} /> {/* DashbaordPage*/}
           <Route path="generateQuiz" element={<GenerateQuizPage />} />
           <Route path="questions" element={<QuestionsPage />} />
           <Route path="categories" element={<CategoriesPage/>} />
