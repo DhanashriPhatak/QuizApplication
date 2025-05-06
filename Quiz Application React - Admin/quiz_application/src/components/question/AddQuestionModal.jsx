@@ -1,24 +1,38 @@
 import React, { useEffect, useState } from 'react'
 import '../../css/addQuestionModal.css';
-import { addQuestion, getAllCategories } from '../../services/QuestionService';
+import { addQuestion, getAllCategories,editQuestion } from '../../services/QuestionService';
 import Spinner from '../common/Spinner';
 import ShowToast from '../common/ShowToast';
 
-const AddQuestionModal = ({show,onClose}) => {
+const AddQuestionModal = ({show,onClose,editMode = false, existingQuestion = null, onUpdate = () => {}}) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [validated,setValidated] = useState(false);
   const [submitting,setSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    question: '',
-    optionA: '',
-    optionB: '',
-    optionC: '',
-    optionD: '',
-    category: '',
-    diffLevel: '',
-    correctAnswer: ''
-  });
+  const [formData,setFormData] = useState({});
+  useEffect(() => {
+    if (editMode && existingQuestion) {
+      console.log(existingQuestion);
+      setFormData({
+        question: existingQuestion.question || '',
+        optionA: existingQuestion.option_a || '',
+        optionB: existingQuestion.option_b || '',
+        optionC: existingQuestion.option_c || '',
+        optionD: existingQuestion.option_d || '',
+        category: existingQuestion.category || '',
+        diffLevel: existingQuestion.diff_level || '',
+        correctAnswer: mapAnswerToOptionKey(existingQuestion.ans) || ''
+      });
+    }
+  }, [editMode, existingQuestion]);
+
+  const mapAnswerToOptionKey=(ans) =>{
+    if(ans === existingQuestion.option_a) return 'optionA';
+    if (ans === existingQuestion.option_b) return 'optionB';
+    if (ans === existingQuestion.option_c) return 'optionC';
+    if (ans === existingQuestion.option_d) return 'optionD';
+    return '';
+  }
 
     const [formErrors,setFormErrors] = useState({
       question:'',
@@ -127,22 +141,29 @@ const AddQuestionModal = ({show,onClose}) => {
           id: categories.find(cat => cat.category === formData.category)?.id
         }
       };
+      if (editMode) {
+        payload.id = existingQuestion.id; // required for update
+      }
       // console.log("inside handle submit",validateForm());
       if(validateForm()){
         setSubmitting(true);
-        console.log("inside validate form",formData);
-        addQuestion(payload)
+        const apicall = editMode?editQuestion(payload):addQuestion(payload);
+        apicall
         .then((res)=>{
-          console.log(res.data);
           setSubmitting(false);
           onClose();
-          ShowToast({ type: 'success', title: 'Success', message: 'Question Added successfully!' });
+          if(editMode)
+          {
+            onUpdate(res.data);
+            ShowToast({ type: 'success', title: 'Success', message: 'Question updated successfully!' });
+          } else {
+            ShowToast({ type: 'success', title: 'Success', message: 'Question added successfully!' });
+          }
         })
         .catch((error)=>{
-          console.error(error);
           setSubmitting(false);
-          ShowToast({type:'error',title:'Error',message:'Failed to Add a Question. Please try again.'});
-        })
+          ShowToast({ type: 'error', title: 'Error', message: 'Operation failed. Please try again.' });
+        });
       }
     }
 
@@ -197,7 +218,9 @@ const AddQuestionModal = ({show,onClose}) => {
               <div className="modal-content rounded shadow">
                 {/* Modal Header */}
                 <div className="modal-header">
-                  <h5 className="modal-title">Add New Question</h5>
+                  <h5 className="modal-title">
+                    {editMode?'Edit Question':'Add New Question'}
+                    </h5>
                   <button type="button" className="btn-close" onClick={handleClose}></button>
                 </div>
                 {/* Modal Body */}
@@ -325,7 +348,7 @@ const AddQuestionModal = ({show,onClose}) => {
                 <div className="modal-footer">
                   <button className="btn btn-secondary" onClick={handleClose}>Cancel</button>
                   <button className="btn btn-primary" type="submit" disabled={submitting}>
-                    {submitting?<Spinner></Spinner> :'Save Question'}</button>
+                    {submitting?<Spinner></Spinner> :(editMode ? 'Update Question' : 'Save Question')}</button>
                 </div>
                 </form>
               </div>

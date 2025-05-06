@@ -58,7 +58,11 @@ function QuestionsPage() {
           })
         )}
       </main>
-      <AddQuestionModal show={showModal} onClose={()=>setShowModal(false)}></AddQuestionModal>
+      <AddQuestionModal 
+      show={showModal} 
+      onClose={()=>setShowModal(false)}
+      categoryId={null}
+      ></AddQuestionModal>
     </>
   )
 }

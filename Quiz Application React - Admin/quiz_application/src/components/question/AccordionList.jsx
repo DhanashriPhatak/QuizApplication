@@ -4,6 +4,7 @@ import { toggleQuestion ,deleteQuestion} from '../../services/QuestionService';
 import ShowToast from '../common/ShowToast';
 import Spinner from '../common/Spinner';
 import '../../css/accordionList.css';
+import AddQuestionModal from './AddQuestionModal';
 
   const AccordionList = ({ questions = [] ,categoryId,categoryName,setQuestions}) => {
     const accordionId = `accordion-${categoryName.replace(/\s+/g,"-").toLowerCase()}`;
@@ -13,6 +14,7 @@ import '../../css/accordionList.css';
         + -> Matches one or more of the preceding token (in this case, whitespace)
         g -> Global flag - replaces all matches ,not just the first
     */
+   /**Start - Toggle question Active/Inactice */
    const [updatingId,setUpdatingId] = useState(null);
     const handleToggle = (id,currentStatus)=>{
         setUpdatingId(id);
@@ -36,10 +38,20 @@ import '../../css/accordionList.css';
             setUpdatingId(null);
         });
     }
-
+    /**End - Toggle question Active/Inactice */
+    /** start- edit question */
+    const [showEditModal,setShowEditModal] = useState(false);
+    const [questionToEdit,setQuestionToEdit] = useState(null);
     const handleEdit = (e,q)=>{
         e.stopPropagation();
+        setQuestionToEdit(q);
+        setShowEditModal(true);
+    };
+    const handleUpdateQuestion = (updatedQ)=>{
+        setQuestions(prev=>prev.map(q=>q.id===updatedQ.id?{...updatedQ}:q));
     }
+    /**End- edit question */
+    /**Start - Delete Question */
     const[showConfirmModal,setShowConfirmModal] = useState(false);
     const [deleteTargetId,setDeleteTargetId] = useState(null);
     const [deletingId,setDeletingId] = useState(null);
@@ -64,6 +76,7 @@ import '../../css/accordionList.css';
             setShowConfirmModal(false);
         });
     }
+    /**End - Delete Question */
     return (
         <>
             <div className="accordion" id={accordionId}>
@@ -183,6 +196,19 @@ import '../../css/accordionList.css';
                             </div>
                         </div>
                     </div>
+                )}
+                {showEditModal && (
+                <AddQuestionModal
+                    show={showEditModal}
+                    onClose={() => setShowEditModal(false)}
+                    editMode={true}
+                    existingQuestion={questionToEdit}
+                    onUpdate={(updatedQ) => {
+                    setQuestions(prev =>
+                        prev.map(q => q.id === updatedQ.id ? updatedQ : q)
+                    );
+                    }}
+                />
                 )}
             </div>
         </>
