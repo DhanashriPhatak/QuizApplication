@@ -37,10 +37,10 @@ public class QuestionService {
         }
     }
 
-    public ResponseEntity<String> editQuestion(Question question) {
+    public ResponseEntity<?> editQuestion(Question question) {
         try{
-            questionDao.save(question);
-            return new ResponseEntity<>("Success",HttpStatus.OK);
+            Question question1 = questionDao.save(question);
+            return new ResponseEntity<>(question1,HttpStatus.OK);
         }
         catch(Exception e)
         {
@@ -180,7 +180,9 @@ public class QuestionService {
             if(optionalQuestion.isPresent())
             {
                 Question question = optionalQuestion.get();
-                question.setIsActive(question.getIsActive()==0?1:0);
+                Integer currentStatus = Optional.of(question.getIsActive()).orElse(0);
+                question.setIsActive(currentStatus == 0 ? 1 : 0);
+//                question.setIsActive(question.getIsActive()==0?1:0);
                 questionDao.save(question);
                 return  new ResponseEntity<>(question,HttpStatus.OK);
             }
@@ -191,6 +193,8 @@ public class QuestionService {
         catch(Exception e)
         {
             e.printStackTrace();
+//            logger.error("Error while toggling question status", e);
+            System.out.println(e.getMessage());
             return new ResponseEntity<>("Failed to update the Question Status",HttpStatus.BAD_REQUEST);
         }
     }

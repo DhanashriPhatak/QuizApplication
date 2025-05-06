@@ -32,7 +32,7 @@ public class QuestionController {
     To edit any existing question
      */
     @PostMapping("edit")
-    public ResponseEntity<String> editQuestion(@RequestBody Question question)
+    public ResponseEntity<?> editQuestion(@RequestBody Question question)
     {
         return questionService.editQuestion(question);
     }
