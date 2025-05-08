@@ -24,7 +24,6 @@ const SideNav = () => {
                 <i className="nav-icon bi bi-clock-history"></i>
                   <p>Quiz History</p>
                 </Link> </li>
-              
                   <li className="nav-item">
                   <Link to="/questions" className="nav-link">
                     <i className="nav-icon bi bi-card-text"></i> {/*bi-question-circle*/}
@@ -36,7 +35,12 @@ const SideNav = () => {
                     <i className="nav-icon bi bi-tags" ></i>
                     <p>Categories</p>
                     </Link>
-
+                </li>
+                <li className="nav-item">
+                    <Link to="/users" className="nav-link">
+                    <i className="nav-icon bi bi-tags" ></i>
+                    <p>Users</p>
+                    </Link>
                 </li>
             </ul> {/*end::Sidebar Menu*/}
           </nav>

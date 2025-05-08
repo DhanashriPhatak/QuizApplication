@@ -25,10 +25,10 @@ public class QuestionService {
     CategoryDao categoryDao;
 
     //To Add a question in Question Database
-    public ResponseEntity<String> addQuestion(Question question) {
+    public ResponseEntity<?> addQuestion(Question question) {
         try{
-            questionDao.save(question);
-            return new ResponseEntity<>("Success", HttpStatus.OK);
+            Question question1 = questionDao.save(question);
+            return new ResponseEntity<>(question1, HttpStatus.OK);
         }
         catch(Exception e)
         {
@@ -40,6 +40,7 @@ public class QuestionService {
     public ResponseEntity<?> editQuestion(Question question) {
         try{
             Question question1 = questionDao.save(question);
+//            System.out.println(question1.toString());
             return new ResponseEntity<>(question1,HttpStatus.OK);
         }
         catch(Exception e)

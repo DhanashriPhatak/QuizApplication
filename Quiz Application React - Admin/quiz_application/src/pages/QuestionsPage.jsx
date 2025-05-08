@@ -9,7 +9,7 @@ function QuestionsPage() {
   const [error, setError] = useState('');
   const [categories,setCategories] = useState([]);
   const [showModal,setShowModal] = useState(false);
-  
+  const [questionSetters, setQuestionSetters] = useState({});
   useEffect(()=>{
     setLoading(true);
     getAllCategories()
@@ -53,6 +53,12 @@ function QuestionsPage() {
             key={index}
             categoryId={category.id}
             categoryName={category.category}
+            registerSetter={(setter) =>
+              setQuestionSetters((prev) => ({
+                ...prev,
+                [category.id]: setter,
+              }))
+            }
             ></Questions>
             );
           })
@@ -62,6 +68,15 @@ function QuestionsPage() {
       show={showModal} 
       onClose={()=>setShowModal(false)}
       categoryId={null}
+      onUpdate={(newQuestion) => {
+        const catId = newQuestion.category?.id ?? newQuestion.category_id;
+        const setter = questionSetters[catId];
+        if (setter) {
+          setter(prev => [...prev, newQuestion]);
+        } else {
+          console.warn("Setter not found for category:", catId);
+        }
+      }}
       ></AddQuestionModal>
     </>
   )

@@ -19,7 +19,7 @@ const AddQuestionModal = ({show,onClose,editMode = false, existingQuestion = nul
         optionB: existingQuestion.option_b || '',
         optionC: existingQuestion.option_c || '',
         optionD: existingQuestion.option_d || '',
-        category: existingQuestion.category || '',
+        category: existingQuestion.category || categories.find((cat) => cat.id === existingQuestion.category_id)?.category || '',
         diffLevel: existingQuestion.diff_level || '',
         correctAnswer: mapAnswerToOptionKey(existingQuestion.ans) || ''
       });
@@ -147,16 +147,25 @@ const AddQuestionModal = ({show,onClose,editMode = false, existingQuestion = nul
       // console.log("inside handle submit",validateForm());
       if(validateForm()){
         setSubmitting(true);
+        console.log("sendind:-",payload);
         const apicall = editMode?editQuestion(payload):addQuestion(payload);
         apicall
         .then((res)=>{
           setSubmitting(false);
-          onClose();
+          handleClose();
           if(editMode)
           {
             onUpdate(res.data);
             ShowToast({ type: 'success', title: 'Success', message: 'Question updated successfully!' });
           } else {
+            // const newQuestion = res.data;
+            // const categoryObj = categories.find(c=>c.id === newQuestion.category_id);
+            // if(categoryObj)
+            // {
+            //   newQuestion.category = categoryObj;
+            // }
+            // console.log("new question:-",newQuestion);
+            onUpdate(res.data);
             ShowToast({ type: 'success', title: 'Success', message: 'Question added successfully!' });
           }
         })

@@ -4,14 +4,19 @@ import { useState,useEffect } from 'react';
 import AccordianList from './AccordionList';
 import { getQuestionsByCategory } from '../../services/QuestionService';
 
-const  Questions = ({categoryId,categoryName}) => {
+const  Questions = ({categoryId,categoryName, registerSetter}) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [questions, setQuestions] = useState([]);
   const [showQuestion,setShowQuestion] = useState(false);
   const [fetched,setFetched] = useState(false);//prevent refetch
   
-  // console.log("category in quesiton:-"+categoryId);
+  useEffect(() => {
+    if (registerSetter) {
+      registerSetter(setQuestions);
+    }
+  }, [registerSetter]);
+  
   useEffect(()=>{
     if(showQuestion && !fetched)
     {
@@ -30,6 +35,8 @@ const  Questions = ({categoryId,categoryName}) => {
       });
     }
   },[showQuestion,fetched,categoryId]);
+
+  
 
   return (
     <>
