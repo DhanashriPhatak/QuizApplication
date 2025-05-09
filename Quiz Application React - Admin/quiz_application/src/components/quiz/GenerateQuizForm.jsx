@@ -2,7 +2,7 @@ import React from 'react';
 import { useState ,useEffect} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { getAllCategories } from '../../services/QuestionService';
+import { getCategoryStats } from '../../services/QuestionService';
 import Spinner from '../common/Spinner';
 import ShowToast from '../common/ShowToast';
 
@@ -16,6 +16,7 @@ const GenerateQuizForm = ({onPreviewUpdate}) => {
         totalQuestions: '',
         selectedCategories:[],
         categoryConfig: {}, //{[categoeyod]:{difficulty:'',count:''}}
+        mode:'auto' // or manual
     });
 
     
@@ -24,10 +25,14 @@ const GenerateQuizForm = ({onPreviewUpdate}) => {
     useEffect(()=>{
         setLoading(true);
         setError('');
-        getAllCategories()
+        getCategoryStats()
         .then((res)=>{
-            setCategories(res.data || []);
-            console.log(categories);
+            const mapped = (res.data || []).map(c => ({
+                id: c.categoryId,
+                category: c.categoryName,
+                availableCount: c.totalQuestions
+              }));
+              setCategories(mapped);
             setError('');
         })
         .catch((error)=>{
@@ -75,6 +80,7 @@ const GenerateQuizForm = ({onPreviewUpdate}) => {
             selectedCategories:selected,
             categoryConfig:updatedConfig
         }));
+        console.log("selected caegory:-",formData);
         setErrors((prev) => ({ ...prev, selectedCategories: '' }));
     };
     /**END - Save Category changed */
@@ -96,34 +102,52 @@ const GenerateQuizForm = ({onPreviewUpdate}) => {
     /**START - Validate form */
     const validateForm = ()=>{
         const errs = {};
-
+        let totalAvailable = 0;
         if(!formData.quizName.trim())
         {
             errs.quizName = 'Quiz name is required';
         }
-        if(formData.totalQuestions || isNaN(formData.totalQuestions))
+        if(!formData.totalQuestions || isNaN(formData.totalQuestions))
         {
             errs.totalQuestions = 'Enter a valid total question count';
         }
-        if (formData.selectedCategories.length === 0) errs.selectedCategories = 'Select at least one category';
-        let total = 0;
-        formData.selectedCategories.forEach((id)=>{
-            const config = formData.categoryConfig[id];
-            if(!config.difficulty)
-            {
-                errs[`difficulty_${id}`] = 'Select difficulty';
-            }
-            if(!config.count)
-            {
-                errs[`count_${id}`] = 'Enter valid count';
-            }else {
-                total += parseInt(config.count);
-            }
-        });
-        if(total != parseInt(formData.totalQuestions))
-        {
-            errs.totalMismatch = 'Sum of category-wise questions must equal total quiz questions';
+        formData.selectedCategories.forEach((id) => {
+            const available = categories.find(c => c.id === id)?.availableCount || 0;
+            totalAvailable += available;
+          });
+        
+        if (parseInt(formData.totalQuestions) > totalAvailable) {
+        errs.totalQuestions = 'Total questions exceed available question pool';
         }
+        if (formData.mode === 'manual') 
+        {
+            if (formData.selectedCategories.length === 0) errs.selectedCategories = 'Select at least one category';
+            let total = 0;
+            formData.selectedCategories.forEach((id)=>{
+                const config = formData.categoryConfig[id];
+                const available = categories.find((c) => c.id === id)?.availableCount || 0;
+                if(!config.difficulty)
+                {
+                    errs[`difficulty_${id}`] = 'Select difficulty';
+                }
+                if(!config.count)
+                {
+                    errs[`count_${id}`] = 'Enter valid count';
+                }else {
+                    if (parseInt(config.count) > available) {
+                      errs[`count_${id}`] = `Only ${available} questions available in this category`;
+                    }else {
+                        total += parseInt(config.count);
+                    }
+                }
+            });
+
+            if(total != parseInt(formData.totalQuestions))
+            {
+                errs.totalMismatch = 'Sum of category-wise questions must equal total quiz questions';
+            }
+        }
+
         setErrors(errs);
         return Object.keys(errs).length ===0;
     };
@@ -166,6 +190,41 @@ const GenerateQuizForm = ({onPreviewUpdate}) => {
                         {errors.quizName && <div className="invalid-feedback">{errors.quizName}</div>}
                     </div>
 
+                    <div className="col-md-12">
+                    <label className="form-label">Select Quiz Mode</label>
+                    <div>
+                        <div className="form-check form-check-inline">
+                        <input
+                            className="form-check-input"
+                            type="radio"
+                            name="mode"
+                            id="manualMode"
+                            value="manual"
+                            checked={formData.mode === 'manual'}
+                            onChange={handleChange}
+                        />
+                        <label className="form-check-label" htmlFor="manualMode">
+                            Manually set difficulty and number of questions
+                        </label>
+                        </div>
+                        <div className="form-check form-check-inline">
+                        <input
+                            className="form-check-input"
+                            type="radio"
+                            name="mode"
+                            id="autoMode"
+                            value="auto"
+                            checked={formData.mode === 'auto'}
+                            onChange={handleChange}
+                        />
+                        <label className="form-check-label" htmlFor="autoMode">
+                            Auto-generate questions randomly
+                        </label>
+                        </div>
+                    </div>
+                    </div>
+
+
                     <div className="col-md-6">
                         <label htmlFor="totalQuestions" className="form-label">Total Questions</label>
                         <input
@@ -181,7 +240,9 @@ const GenerateQuizForm = ({onPreviewUpdate}) => {
                     </div>
 
                     <div className="col-md-6">
-                        <label htmlFor="selectCategories" className="form-label">Select Categories</label>
+                        <label htmlFor="selectCategories" className="form-label">
+                            Select Categories<small className="text-muted">(Available questions)</small>
+                        </label>
                         <select
                         multiple
                         className={`form-control ${errors.selectedCategories ? 'is-invalid' : ''}`}
@@ -190,18 +251,21 @@ const GenerateQuizForm = ({onPreviewUpdate}) => {
                         onChange={handleCategoryChange}
                         >
                         {categories.map((cat) => (
-                            <option key={cat.categoryId} value={cat.id}>{cat.category}</option>
+                            <option key={cat.categoryId} value={cat.id}>{cat.category} ({cat.availableCount})</option>
                         ))}
                         </select>
                         {errors.selectedCategories && <div className="invalid-feedback">{errors.selectedCategories}</div>}
                     </div>
 
-                    {formData.selectedCategories.map((catId) => {
-                        const category = categories.find((c) => c.categoryId === parseInt(catId));
+                    {formData.mode === 'manual' && formData.selectedCategories.map((catId) => {
+                        const category = categories.find((c) => c.id === parseInt(catId));
                         const config = formData.categoryConfig[catId] || {};
                         return (
                         <div key={catId} className="border rounded p-3 mb-2">
-                            <strong>{category?.categoryName}</strong>
+                            <strong>
+                                {category?.category}
+                                <span className="text-muted"> (Available: {category?.availableCount})</span>
+                            </strong>
                             <div className="row mt-2">
                             <div className="col-md-6">
                                 <label className="form-label">Difficulty</label>
@@ -239,7 +303,7 @@ const GenerateQuizForm = ({onPreviewUpdate}) => {
                     </div>
                 </div>
                 <div className="card-footer">
-                    <button className="btn btn-info" type="submit">Generate Quiz</button>
+                    <button className="btn btn-info" type="submit">Generate Quiz Preview</button>
                 </div>
             </form>
             </div>
