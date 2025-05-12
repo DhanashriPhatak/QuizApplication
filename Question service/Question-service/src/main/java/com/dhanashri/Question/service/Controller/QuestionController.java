@@ -1,11 +1,9 @@
 package com.dhanashri.Question.service.Controller;
 
-import com.dhanashri.Question.service.Module.Category;
-import com.dhanashri.Question.service.Module.Question;
-import com.dhanashri.Question.service.Module.QuestionWrapper;
-import com.dhanashri.Question.service.Module.Response;
+import com.dhanashri.Question.service.Module.*;
 import com.dhanashri.Question.service.Service.QuestionService;
 import jakarta.ws.rs.Path;
+import org.aspectj.lang.annotation.DeclareError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -85,6 +83,14 @@ public class QuestionController {
         return questionService.getQuestionsForQuiz(category_id,numberOfQuestions);
     }
 
+    /** generate Quiz when mode is manual*/
+    @PostMapping("generateQuizManual")
+    public ResponseEntity<?> getQuestionsForManualQuiz(@RequestParam int categoryId,
+                                                       @RequestParam String diffLevel,
+                                                       @RequestParam int numberOfQuestions)
+    {
+        return questionService.getQuestionsForManualQuiz(categoryId,diffLevel,numberOfQuestions);
+    }
     /*
      Description: Return All the question based on list of id's provided
      */

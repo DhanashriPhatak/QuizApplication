@@ -15,4 +15,12 @@ public interface QuestionDao extends JpaRepository<Question,Integer> {
 
     @Query(value = "select q.id from question q where q.category=:category order by RANDOM() LIMIT :numQ",nativeQuery = true)
     List<Integer> findRandomQuestionsByCategory(Category category, int numQ);
+
+    @Query(value= """
+            SELECT q.id from quesiton q
+            WHERE q.category = :category AND q.diff_level = :diffLevel ANDq.is_active=1
+            ORDER BY RAND()
+            LIMIT :numberOfQuesitons
+            """,nativeQuery = true)
+    List<Integer> findRandomByCategoryAndDiffLevel(Category category,String diffLevel,int numberOfQuestions);
 }

@@ -2,10 +2,7 @@ package com.dhanashri.Question.service.Service;
 
 import com.dhanashri.Question.service.Dao.CategoryDao;
 import com.dhanashri.Question.service.Dao.QuestionDao;
-import com.dhanashri.Question.service.Module.Category;
-import com.dhanashri.Question.service.Module.Question;
-import com.dhanashri.Question.service.Module.QuestionWrapper;
-import com.dhanashri.Question.service.Module.Response;
+import com.dhanashri.Question.service.Module.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CancellationException;
 
 @Service
 public class QuestionService {
@@ -123,6 +121,19 @@ public class QuestionService {
         }
     }
 
+    public ResponseEntity<?> getQuestionsForManualQuiz(int categoryId, String diffLevel,int numberOfQuestions) {
+        try{
+            Category category = categoryDao.findById(categoryId).orElseThrow();
+            List<Integer> quesitonIds = questionDao.findRandomByCategoryAndDiffLevel(category,diffLevel,numberOfQuestions);
+            return new ResponseEntity<>(quesitonIds,HttpStatus.OK);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return new ResponseEntity<>("Failed to Qenerate Quiz Questions for maunal mode",HttpStatus.BAD_REQUEST);
+        }
+    }
+
     public ResponseEntity<List<QuestionWrapper>> getQuestionsFromId(List<Integer> questionIds) {
         try{
             List<QuestionWrapper> questionWrapper = new ArrayList<>();
@@ -199,4 +210,6 @@ public class QuestionService {
             return new ResponseEntity<>("Failed to update the Question Status",HttpStatus.BAD_REQUEST);
         }
     }
+
+
 }

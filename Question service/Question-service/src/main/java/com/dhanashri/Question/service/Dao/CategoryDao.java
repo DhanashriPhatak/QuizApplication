@@ -22,7 +22,7 @@ public interface CategoryDao extends JpaRepository<Category,Integer> {
     FROM question q
     RIGHT JOIN category c ON q.category_id = c.id
     GROUP BY c.id, c.category
-    ORDER BY COUNT(q.id) DESC
+    ORDER BY c.id DESC
 """, nativeQuery = true)
     List<CategoryStatsResponse> getCategoryStats();
 }
