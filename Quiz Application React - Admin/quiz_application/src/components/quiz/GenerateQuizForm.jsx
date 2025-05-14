@@ -1,8 +1,7 @@
 import React from 'react';
 import { useState ,useEffect} from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import { getCategoryStats } from '../../services/QuestionService';
+import { generateQuiz,generateQuizManual} from '../../services/QuizService';
 import Spinner from '../common/Spinner';
 import ShowToast from '../common/ShowToast';
 
@@ -156,15 +155,68 @@ const GenerateQuizForm = ({onPreviewUpdate}) => {
     const handleSubmit = (e)=>{
         e.preventDefault();
         if(!validateForm()) return;
-        if(onPreviewUpdate)
+        setLoading(true);
+        setError('');
+        // console.log("Inside submit:-",formData.mode);
+        let response;
+        let payload = "";
+        
+        if(formData.mode === 'manual')
         {
-            onPreviewUpdate(formData);
+            payload = formData.selectedCategories.map((catId)=>({
+                categoryId:catId,
+                diffLevel:formData.categoryConfig[catId].difficulty,
+                numberOfQuestions:formData.categoryConfig[catId].count
+            }));
+            response = generateQuizManual(payload);
         }
-
-        ShowToast({type:'success',title:'Preview Ready',message:'Check the right panel'});
+        else{
+            payload = {
+            categoryId: formData.selectedCategories[0], 
+            quizTitle: formData.quizName,
+            numberOfQuestions: parseInt(formData.totalQuestions),
+            };
+            console.log("payload:-",payload);
+            response = generateQuiz(payload);
+        }
+        response
+        .then((res)=>{
+            if(res.status===200)
+            {
+                ShowToast({type: 'success',title: 'Quiz Created',message: 'Your quiz is ready. Check the right panel.'});
+                if(onPreviewUpdate)
+                {
+                    onPreviewUpdate(res.data.quizId);
+                }
+                handleReset();
+            }
+            else {
+                ShowToast({type: 'error',title: 'Error',message: 'Quiz generation failed. Please try again.'});
+            }
+        })
+        .catch((error)=>{
+            console.log(error);
+            setError('Failed to generate a quiz');
+            ShowToast({type: 'error',title: 'Error',message: error?.response?.data || 'Unexpected error occurred'});
+        })
+        .finally(()=>{
+            setLoading(false);
+        });
     }
     /**END - Submit form */
-    
+    /**START - reset form */
+    const handleReset = ()=>{
+        setFormData({
+        quizName:'',
+        totalQuestions: '',
+        selectedCategories:[],
+        categoryConfig: {}, 
+        mode:'auto' 
+        });
+        setErrors({});
+        ShowToast({ type: 'info', title: 'Reset', message: 'Form has been cleared' });
+    }
+    /**End - reset form */
     if (loading) return <Spinner />;
     if (error) return <div className="alert alert-danger">{error}</div>;
     return (
@@ -173,7 +225,7 @@ const GenerateQuizForm = ({onPreviewUpdate}) => {
             <div className="card-header">
                 <h3 className="card-title">Quiz</h3>
             </div>
-            <form className="needs-validation" onSubmit={handleSubmit} noValidate>
+            <div className="needs-validation" >
                 <div className="card-body">
                     <div className="row g-3">
                     <div className="col-md-12">
@@ -302,10 +354,12 @@ const GenerateQuizForm = ({onPreviewUpdate}) => {
                     {errors.totalMismatch && <div className="text-danger fw-semibold">{errors.totalMismatch}</div>}
                     </div>
                 </div>
-                <div className="card-footer">
-                    <button className="btn btn-info" type="submit">Generate Quiz Preview</button>
+                <div className="card-footer d-flex justify-content-end gap-2">
+                    <button className="btn btn-secondary" type="button" onClick={handleReset}>Reset Form</button>
+                    <button className="btn btn-info" type="button" onClick={handleSubmit}>Generate Quiz Preview</button>
                 </div>
-            </form>
+                </div>
+            {/* </form> */}
             </div>
         </>
     )
