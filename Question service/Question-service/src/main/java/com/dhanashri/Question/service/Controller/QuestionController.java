@@ -78,9 +78,10 @@ public class QuestionController {
     Description:- Generate Quiz by Category and No of questions
      */
     @GetMapping("generateQuiz")
-    public ResponseEntity<List<Integer>> getQuestionsForQuiz(@RequestParam int category_id, @RequestParam int numberOfQuestions)
+    public ResponseEntity<List<Integer>> getQuestionsForQuiz(@RequestParam int categoryId,
+                                                             @RequestParam int numberOfQuestions)
     {
-        return questionService.getQuestionsForQuiz(category_id,numberOfQuestions);
+        return questionService.getQuestionsForQuiz(categoryId,numberOfQuestions);
     }
 
     /** generate Quiz when mode is manual*/

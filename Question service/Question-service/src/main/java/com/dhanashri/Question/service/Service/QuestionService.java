@@ -107,10 +107,10 @@ public class QuestionService {
         }
     }
 
-    public ResponseEntity<List<Integer>> getQuestionsForQuiz(int category, int numberOfQuestions) {
+    public ResponseEntity<List<Integer>> getQuestionsForQuiz(int categoryId, int numberOfQuestions) {
         try {
-            Category category1 = categoryDao.findById(category).get();
-            List<Integer> questionList = questionDao.findRandomQuestionsByCategory(category1,numberOfQuestions);
+//            System.out.println("reached question service:-"+category+" "+numberOfQuestions);
+            List<Integer> questionList = questionDao.findRandomQuestionsByCategory(categoryId,numberOfQuestions);
 
             return new ResponseEntity<>(questionList, HttpStatus.OK);
         }
