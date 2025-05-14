@@ -14,4 +14,5 @@ public class QuestionWrapper {
     private String option_3;
     private String option_4;
     private String question;
+    private String diff_level;
 }

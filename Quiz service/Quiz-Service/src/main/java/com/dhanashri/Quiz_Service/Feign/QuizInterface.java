@@ -14,8 +14,13 @@ import java.util.List;
 public interface QuizInterface {
 
     @GetMapping("question/generateQuiz")
-    public ResponseEntity<List<Integer>> getQuestionForQuiz(@RequestParam String category,
+    public ResponseEntity<List<Integer>> getQuestionForQuiz(@RequestParam int categoryId,
                                                             @RequestParam int numberOfQuestions);
+
+    @PostMapping("question/generateQuizManual")
+    public ResponseEntity<?> getQuestionsForManualQuiz(@RequestParam("categoryId") int categoryId,
+                                                       @RequestParam("diffLevel") String diff_level,
+                                                       @RequestParam("numberOfQuestions") int numberOfQuestions);
 
     @PostMapping("question/getQuestions")
     public ResponseEntity<List<QuestionWrapper>> getQuestionById(@RequestParam List<Integer> questionIds);

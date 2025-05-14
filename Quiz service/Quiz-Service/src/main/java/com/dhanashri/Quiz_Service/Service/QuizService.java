@@ -2,11 +2,9 @@ package com.dhanashri.Quiz_Service.Service;
 
 import com.dhanashri.Quiz_Service.Dao.QuizDao;
 import com.dhanashri.Quiz_Service.Feign.QuizInterface;
-import com.dhanashri.Quiz_Service.Module.QuestionWrapper;
-import com.dhanashri.Quiz_Service.Module.Quiz;
-import com.dhanashri.Quiz_Service.Module.QuizDTO;
-import com.dhanashri.Quiz_Service.Module.QuizQuestion;
+import com.dhanashri.Quiz_Service.Module.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
@@ -22,11 +20,13 @@ public class QuizService {
     @Autowired
     QuizInterface quizInterface;
 
-    public ResponseEntity<String> createQuiz(QuizDTO quizDTO) {
+    public ResponseEntity<?> createQuiz(QuizDTO quizDTO) {
         try{
-            List<Integer> questionIds = quizInterface.getQuestionForQuiz(quizDTO.getCategory(), quizDTO.getNumberOfQuestions()).getBody();
+            System.out.println("reached here:-");
+            List<Integer> questionIds = quizInterface.getQuestionForQuiz(quizDTO.getCategoryId(),
+                    quizDTO.getNumberOfQuestions()).getBody();
             Quiz quiz = new Quiz();
-            quiz.setQuiz_title(quizDTO.getQuiz_title());
+            quiz.setQuiz_title(quizDTO.getQuizTitle());
             List<QuizQuestion> quizQuestionList = new ArrayList<>();
             assert questionIds != null;
             for(int i:questionIds)
@@ -39,14 +39,54 @@ public class QuizService {
             System.out.println("check");
             quiz.setQuestions(quizQuestionList);
             quizDao.save(quiz);
-
-//            return new ResponseEntity<>("Quiz Created Successfully", HttpStatus.OK);
-            return ResponseEntity.ok("Quiz Created Successfully");
+            return new ResponseEntity<>(quiz.getQuiz_id(),HttpStatus.OK);
         }
         catch(Exception e)
         {
 //          return new ResponseEntity<>("Something Went Wrong",HttpStatus.BAD_REQUEST);
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    public ResponseEntity<?> generateQuizManual(ManualQuizRequest manualQuizRequest) {
+        try{
+            List<Integer> allQuestionIds = new ArrayList<>();
+            for(ManualQuizDTO manualQuizDTO:manualQuizRequest.getConfigList())
+            {
+                ResponseEntity<?> idsResponse  = quizInterface.getQuestionsForManualQuiz(manualQuizDTO.getCategoryId(),
+                        manualQuizDTO.getDiff_level(),manualQuizDTO.getNumberOfQuestions());
+
+                if(idsResponse .getStatusCode().is2xxSuccessful())
+                {
+                    List<Integer> ids = (List<Integer>) idsResponse .getBody();
+                    if (ids != null) {
+                        allQuestionIds.addAll(ids);
+                    }
+                }
+                else {
+                    return new ResponseEntity<>("Failed to fetch questions for Manual quiz", HttpStatus.BAD_REQUEST);
+                }
+            }
+            Quiz quiz = new Quiz();
+            quiz.setQuiz_title(manualQuizRequest.getQuizTitle());
+            List<QuizQuestion> quizQuestionList = new ArrayList<>();
+
+            for(int id:allQuestionIds)
+            {
+                QuizQuestion quizQuestion = new QuizQuestion();
+                quizQuestion.setQuiz_question_id(id);
+                quizQuestion.setQuiz(quiz);
+                quizQuestionList.add(quizQuestion);
+            }
+            quiz.setQuestions(quizQuestionList);
+            quizDao.save(quiz);
+
+            return new ResponseEntity<>(quiz.getQuiz_id(),HttpStatus.OK);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return new ResponseEntity<>("Failed to Generate a Manual quiz", HttpStatus.BAD_REQUEST);
         }
     }
 

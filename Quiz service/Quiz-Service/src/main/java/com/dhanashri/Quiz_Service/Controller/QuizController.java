@@ -1,5 +1,7 @@
 package com.dhanashri.Quiz_Service.Controller;
 
+import com.dhanashri.Quiz_Service.Module.ManualQuizDTO;
+import com.dhanashri.Quiz_Service.Module.ManualQuizRequest;
 import com.dhanashri.Quiz_Service.Module.QuestionWrapper;
 import com.dhanashri.Quiz_Service.Module.QuizDTO;
 import com.dhanashri.Quiz_Service.Service.QuizService;
@@ -17,13 +19,25 @@ public class QuizController {
     QuizService quizService;
 
     @PostMapping("generateQuiz")
-    public ResponseEntity<String> createQuiz(@RequestBody QuizDTO quizDTO)
+    public ResponseEntity<?> createQuiz(@RequestBody QuizDTO quizDTO)
     {
         return quizService.createQuiz(quizDTO);
     }
 
+    @PostMapping("generateQuizManual")
+    public ResponseEntity<?> generateQuizManual(@RequestBody ManualQuizRequest manualQuizRequest)
+    {
+        return quizService.generateQuizManual(manualQuizRequest);
+    }
+
     @PostMapping("get/{id}")
     public ResponseEntity<List<QuestionWrapper>> getQuizQuestions(@PathVariable int id)
+    {
+        return quizService.getQuizQuestions(id);
+    }
+
+    @PostMapping("getQuestionPreview/{id}")
+    public ResponseEntity<?> getQuizQuestionsForPreview(@PathVariable int id)
     {
         return quizService.getQuizQuestions(id);
     }
