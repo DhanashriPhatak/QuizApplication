@@ -9,18 +9,18 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface QuestionDao extends JpaRepository<Question,Integer> {
+public interface QuestionDao extends JpaRepository<Question,Integer>,QuestionDaoCustom{
 
     List<Question> findByCategory(Category category);
 
     @Query(value = "select q.id from question q where q.category_id=:categoryId order by RANDOM() LIMIT :numQ",nativeQuery = true)
     List<Integer> findRandomQuestionsByCategory(int categoryId, int numQ);
 
-    @Query(value= """
-            SELECT q.id from quesiton q
-            WHERE q.category = :category AND q.diff_level = :diffLevel ANDq.is_active=1
-            ORDER BY RAND()
-            LIMIT :numberOfQuesitons
-            """,nativeQuery = true)
-    List<Integer> findRandomByCategoryAndDiffLevel(Category category,String diffLevel,int numberOfQuestions);
+//    @Query(value= """
+//            SELECT q.id from quesiton q
+//            WHERE q.category = ?1 AND q.diff_level = ?2 ANDq.is_active=1
+//            ORDER BY RANDOM()
+//            LIMIT ?3
+//            """,nativeQuery = true)
+//    List<Integer> findRandomByCategoryAndDiffLevel(int category,String diffLevel,int numberOfQuestions);
 }

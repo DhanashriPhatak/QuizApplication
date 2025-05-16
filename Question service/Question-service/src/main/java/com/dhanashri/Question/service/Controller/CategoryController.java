@@ -2,6 +2,7 @@ package com.dhanashri.Question.service.Controller;
 
 import com.dhanashri.Question.service.Module.Category;
 import com.dhanashri.Question.service.Module.CategoryStatsResponse;
+import com.dhanashri.Question.service.Module.GenerateQuizCategoryDTO;
 import com.dhanashri.Question.service.Module.Response;
 import com.dhanashri.Question.service.Service.CategoryService;
 import com.netflix.discovery.converters.Auto;
@@ -30,6 +31,13 @@ public class CategoryController {
     public ResponseEntity<List<CategoryStatsResponse>> getCategoryStats()
     {
         return categoryService.getCategoryStats();
+    }
+
+    /** Description: This is to get category Stats*/
+    @GetMapping("getActiveQuestionCountByCategory")
+    public ResponseEntity<?> getActiveQuestionCountByCategory()
+    {
+        return categoryService.getActiveQuestionCountByCategory();
     }
 
     /** Description:- This is to Add a category*/

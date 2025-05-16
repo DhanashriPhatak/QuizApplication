@@ -124,7 +124,7 @@ public class QuestionService {
     public ResponseEntity<?> getQuestionsForManualQuiz(int categoryId, String diffLevel,int numberOfQuestions) {
         try{
             Category category = categoryDao.findById(categoryId).orElseThrow();
-            List<Integer> quesitonIds = questionDao.findRandomByCategoryAndDiffLevel(category,diffLevel,numberOfQuestions);
+            List<Integer> quesitonIds = questionDao.findRandomQuestionIds(category,diffLevel,numberOfQuestions);
             return new ResponseEntity<>(quesitonIds,HttpStatus.OK);
         }
         catch(Exception e)

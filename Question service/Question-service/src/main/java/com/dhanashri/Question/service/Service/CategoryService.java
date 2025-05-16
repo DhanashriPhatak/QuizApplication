@@ -4,6 +4,7 @@ import com.dhanashri.Question.service.Dao.CategoryDao;
 import com.dhanashri.Question.service.Dao.QuestionDao;
 import com.dhanashri.Question.service.Module.Category;
 import com.dhanashri.Question.service.Module.CategoryStatsResponse;
+import com.dhanashri.Question.service.Module.GenerateQuizCategoryDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties;
 import org.springframework.http.HttpStatus;
@@ -45,7 +46,18 @@ public class CategoryService {
             e.printStackTrace();
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST);
         }
+    }
 
+    public ResponseEntity<?> getActiveQuestionCountByCategory() {
+        try{
+            List<GenerateQuizCategoryDTO> generateQuizCategoryDTOS = categoryDao.getGenerateQuizInventory();
+            return new ResponseEntity<>(generateQuizCategoryDTOS, HttpStatus.OK);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();;
+            return new ResponseEntity<>("Error Occured while getting the count of active questions by category",HttpStatus.BAD_REQUEST);
+        }
     }
 
     public ResponseEntity<String> addCategory(Category category) {
@@ -91,4 +103,6 @@ public class CategoryService {
             return new ResponseEntity<>("Error occured while updating Category",HttpStatus.BAD_REQUEST);
         }
     }
+
+
 }
