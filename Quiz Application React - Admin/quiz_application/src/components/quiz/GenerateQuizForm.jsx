@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState ,useEffect} from 'react';
-import { getCategoryStats } from '../../services/QuestionService';
+import { getActiveQuestionCountByCategory } from '../../services/QuestionService';
 import { generateQuiz,generateQuizManual} from '../../services/QuizService';
 import Spinner from '../common/Spinner';
 import ShowToast from '../common/ShowToast';
@@ -24,14 +24,21 @@ const GenerateQuizForm = ({onPreviewUpdate}) => {
     useEffect(()=>{
         setLoading(true);
         setError('');
-        getCategoryStats()
+        getActiveQuestionCountByCategory()
         .then((res)=>{
+            console.log(res.data);
             const mapped = (res.data || []).map(c => ({
                 id: c.categoryId,
-                category: c.categoryName,
-                availableCount: c.totalQuestions
+                category: c.category,
+                availableCount: c.total,
+                difficultyCounts: {
+                    Random: c.total,
+                    Easy: c.easyCount,
+                    Medium: c.mediumCount,
+                    Hard: c.hardCount
+                }
               }));
-              setCategories(mapped);
+            setCategories(mapped);
             setError('');
         })
         .catch((error)=>{
@@ -44,6 +51,7 @@ const GenerateQuizForm = ({onPreviewUpdate}) => {
     /**END :- populate categories */
     /**START - Save the entered data  */
     const handleChange = (e)=>{
+        setError('');
         const {name,value} = e.target;
         setFormData((prev)=>({
           ...prev,
@@ -133,10 +141,19 @@ const GenerateQuizForm = ({onPreviewUpdate}) => {
                 {
                     errs[`count_${id}`] = 'Enter valid count';
                 }else {
-                    if (parseInt(config.count) > available) {
-                      errs[`count_${id}`] = `Only ${available} questions available in this category`;
-                    }else {
-                        total += parseInt(config.count);
+                    const requestedCount = parseInt(config.count);
+                    const categoryObj = categories.find((c) => c.id === id);
+                    const availableByDifficulty = categoryObj?.difficultyCounts?.[config.difficulty] || 0;
+                    if(requestedCount > available)
+                    {
+                        errs[`count_${id}`] = `Only ${available} total questions available in this category`;
+                    }
+                    else if(requestedCount > availableByDifficulty)
+                    {
+                        errs[`count_${id}`] =  `Only ${availableByDifficulty} '${config.difficulty}' questions available in this category`;
+                    }
+                    else{
+                        total+=requestedCount;
                     }
                 }
             });
@@ -163,11 +180,15 @@ const GenerateQuizForm = ({onPreviewUpdate}) => {
         
         if(formData.mode === 'manual')
         {
-            payload = formData.selectedCategories.map((catId)=>({
-                categoryId:catId,
-                diffLevel:formData.categoryConfig[catId].difficulty,
-                numberOfQuestions:formData.categoryConfig[catId].count
-            }));
+            payload = {
+                quizTitle:formData.quizName,
+                configList: formData.selectedCategories.map((catId)=>({
+                    categoryId:catId,
+                    diffLevel:formData.categoryConfig[catId].difficulty,
+                    numberOfQuestions: parseInt(formData.categoryConfig[catId].count)
+                    }))
+                };
+            console.log("payload:-",payload);
             response = generateQuizManual(payload);
         }
         else{
@@ -218,9 +239,10 @@ const GenerateQuizForm = ({onPreviewUpdate}) => {
     }
     /**End - reset form */
     if (loading) return <Spinner />;
-    if (error) return <div className="alert alert-danger">{error}</div>;
+    
     return (
         <>
+        {error &&  <div className="alert alert-danger">{error}</div>}
         <div className="card card-info card-outline">
             <div className="card-header">
                 <h3 className="card-title">Quiz</h3>
@@ -316,7 +338,12 @@ const GenerateQuizForm = ({onPreviewUpdate}) => {
                         <div key={catId} className="border rounded p-3 mb-2">
                             <strong>
                                 {category?.category}
-                                <span className="text-muted"> (Available: {category?.availableCount})</span>
+                                <span className="text-muted">
+                                    {' '}
+                                    ( Easy: {category?.difficultyCounts?.Easy || 0 } | {' '}
+                                    Medium: {category?.difficultyCounts?.Medium || 0} | {' '}
+                                    Hard: {category?.difficultyCounts?.Hard || 0 }
+                                    )</span>
                             </strong>
                             <div className="row mt-2">
                             <div className="col-md-6">
@@ -327,6 +354,7 @@ const GenerateQuizForm = ({onPreviewUpdate}) => {
                                 onChange={(e) => handleCategoryConfigChanged(catId, 'difficulty', e.target.value)}
                                 >
                                 <option value="">Choose...</option>
+                                <option value="Random">Random</option>
                                 <option value="Easy">Easy</option>
                                 <option value="Medium">Medium</option>
                                 <option value="Hard">Hard</option>

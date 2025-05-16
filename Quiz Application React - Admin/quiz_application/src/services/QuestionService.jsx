@@ -23,6 +23,7 @@ export const deleteQuestion = (id)=> axios.delete(`${QUESTION_BASE_URL}/${id}`,{
 /** Category Rest Endpoints */
 export const getAllCategories = () => axios.get(`${CATEGORY_BASE_URL}/getAllCategories`, {withCredentials: true});
 export const getCategoryStats = ()=>axios.get(`${CATEGORY_BASE_URL}/getCategoryStats`,{withCredentials:true});
+export const getActiveQuestionCountByCategory = ()=>axios.get(`${CATEGORY_BASE_URL}/getActiveQuestionCountByCategory`,{withCredentials:true});
 export const addCategory = (category)=>
      axios.post(`${CATEGORY_BASE_URL}/add`,category,{
           headers:{
