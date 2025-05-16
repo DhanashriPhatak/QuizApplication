@@ -1,6 +1,7 @@
 package com.dhanashri.Quiz_Service.Module;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,6 +20,7 @@ public class QuizQuestion {
 
     @ManyToOne
     @JoinColumn(name="quiz_id")
+    @JsonBackReference
     private Quiz quiz;
 
     private int question_id;

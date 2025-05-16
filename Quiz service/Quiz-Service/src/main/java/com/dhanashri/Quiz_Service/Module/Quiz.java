@@ -1,6 +1,7 @@
 package com.dhanashri.Quiz_Service.Module;
 
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,6 +23,7 @@ public class Quiz {
     private String quiz_title;
     private LocalDateTime created_at = LocalDateTime.now();
 
-    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<QuizQuestion> questions = new ArrayList<>();
 }

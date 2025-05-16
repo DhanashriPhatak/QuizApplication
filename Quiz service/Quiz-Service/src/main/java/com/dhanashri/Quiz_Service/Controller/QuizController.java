@@ -27,6 +27,7 @@ public class QuizController {
     @PostMapping("generateQuizManual")
     public ResponseEntity<?> generateQuizManual(@RequestBody ManualQuizRequest manualQuizRequest)
     {
+        System.out.println("inside controller");
         return quizService.generateQuizManual(manualQuizRequest);
     }
 

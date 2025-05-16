@@ -50,11 +50,20 @@ public class QuizService {
 
     public ResponseEntity<?> generateQuizManual(ManualQuizRequest manualQuizRequest) {
         try{
+            System.out.println("inside service");
             List<Integer> allQuestionIds = new ArrayList<>();
             for(ManualQuizDTO manualQuizDTO:manualQuizRequest.getConfigList())
             {
-                ResponseEntity<?> idsResponse  = quizInterface.getQuestionsForManualQuiz(manualQuizDTO.getCategoryId(),
-                        manualQuizDTO.getDiff_level(),manualQuizDTO.getNumberOfQuestions());
+                ResponseEntity<?> idsResponse = null;
+                if(manualQuizDTO.getDiffLevel().equals("Random"))
+                {
+                    idsResponse = quizInterface.getQuestionForQuiz(manualQuizDTO.getCategoryId()
+                            ,manualQuizDTO.getNumberOfQuestions());
+                }
+                else {
+                    idsResponse = quizInterface.getQuestionsForManualQuiz(manualQuizDTO.getCategoryId(),
+                            manualQuizDTO.getDiffLevel(),manualQuizDTO.getNumberOfQuestions());
+                }
 
                 if(idsResponse .getStatusCode().is2xxSuccessful())
                 {
@@ -74,7 +83,8 @@ public class QuizService {
             for(int id:allQuestionIds)
             {
                 QuizQuestion quizQuestion = new QuizQuestion();
-                quizQuestion.setQuiz_question_id(id);
+//                quizQuestion.setQuiz_question_id(id);
+                quizQuestion.setQuestion_id(id);
                 quizQuestion.setQuiz(quiz);
                 quizQuestionList.add(quizQuestion);
             }

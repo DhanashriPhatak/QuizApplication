@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ManualQuizDTO {
     private int categoryId;
-    private String diff_level;
+    private String diffLevel;
     private int numberOfQuestions;
 
 }
