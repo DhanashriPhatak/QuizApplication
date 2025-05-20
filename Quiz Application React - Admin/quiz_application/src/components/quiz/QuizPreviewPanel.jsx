@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { getQuizQuestions } from '../../services/QuizService';
 
-const QuizPreviewPanel = ({quizId}) => {
+const QuizPreviewPanel = ({quizId,previewMode=false}) => {
   const [questions,setQuestions] = useState([]);
   const [loading,setLoading] = useState(false);
   const [error,setError] = useState('');
@@ -14,7 +14,14 @@ const QuizPreviewPanel = ({quizId}) => {
 
     getQuizQuestions(quizId)
     .then((res)=>{
-        setQuestions(res.data);
+        const transformed = (res.data || []).map(q=>({
+          id:q.id,
+          text:q.question,
+          category:q.category,
+          difficulty:q.diff_level,
+          options:[q.option_1,q.option_2,q.option_3,q.option_4]
+        }));
+        setQuestions(transformed);
         setError('');
     })
     .catch((error)=>{
@@ -41,14 +48,20 @@ const QuizPreviewPanel = ({quizId}) => {
   return (
     <>
        <div className="quiz-preview">
-          {questions.map((q, index) => (
-            <div key={index} className="mb-3 p-3 border rounded bg-light">
-              <h6>{index + 1}. {q.question}</h6>
+          {questions.map((question, index) => (
+            <div key={question.id} className="mb-4 p-3 border rounded">
+              <h5>Q{index + 1}. {question.text || 'Untitled Question'}</h5>
+
+              {previewMode && (
+                <p className="text-muted">
+                  <strong>Category:</strong> {question.category || 'N/A'} | <strong>Difficulty:</strong> {question.difficulty || 'N/A' }
+                </p>
+              )}
+
               <ul>
-                <li>A. {q.optionA}</li>
-                <li>B. {q.optionB}</li>
-                <li>C. {q.optionC}</li>
-                <li>D. {q.optionD}</li>
+                {(question.options || []).map((opt, idx) => (
+                  <li key={idx}>{opt}</li>
+                ))}
               </ul>
             </div>
           ))}

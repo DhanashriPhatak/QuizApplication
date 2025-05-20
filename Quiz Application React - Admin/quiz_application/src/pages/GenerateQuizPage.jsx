@@ -16,7 +16,7 @@ const GenerateQuizPage = () => {
             </div>
             <div className="col-lg-6 col-md-12">
               <h3 className="mb-3 fw-bold">Quiz Preview</h3>
-              <QuizPreviewPanel quizId={quizId}/>
+              <QuizPreviewPanel quizId={quizId} previewMode={true}/>
             </div>
           </div>
         </div>

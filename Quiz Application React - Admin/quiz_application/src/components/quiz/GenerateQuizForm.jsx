@@ -207,7 +207,8 @@ const GenerateQuizForm = ({onPreviewUpdate}) => {
                 ShowToast({type: 'success',title: 'Quiz Created',message: 'Your quiz is ready. Check the right panel.'});
                 if(onPreviewUpdate)
                 {
-                    onPreviewUpdate(res.data.quizId);
+                    console.log("quiz id:-",res.data);
+                    onPreviewUpdate(res.data);
                 }
                 handleReset();
             }

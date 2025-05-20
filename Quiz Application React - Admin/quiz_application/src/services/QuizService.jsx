@@ -12,4 +12,4 @@ export const generateQuizManual = (formData) => axios.post(`${QUIZ_BASE_URL}/gen
         'Content-Type':'application/json'
     },withCredentials:true});
 
-export const getQuizQuestions = (id) => axios.post(`${QUIZ_BASE_URL}/get/${id}`, {withCredentials: true});
+export const getQuizQuestions = (id) => axios.get(`${QUIZ_BASE_URL}/getQuestionPreview/${id}`, {withCredentials: true});
