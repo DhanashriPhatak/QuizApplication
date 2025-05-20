@@ -72,7 +72,7 @@ public class QuestionService {
             questionWrapper.setOption_2(question.getOption_b());
             questionWrapper.setOption_3(question.getOption_c());
             questionWrapper.setOption_4(question.getOption_d());
-            questionWrapper.setCategory(question.getCategory());
+            questionWrapper.setCategory(question.getCategoryName());
 
             return new ResponseEntity<>(questionWrapper,HttpStatus.OK);
         }
@@ -136,6 +136,7 @@ public class QuestionService {
 
     public ResponseEntity<List<QuestionWrapper>> getQuestionsFromId(List<Integer> questionIds) {
         try{
+
             List<QuestionWrapper> questionWrapper = new ArrayList<>();
             List<Question>  questions  = new ArrayList<>();
             for(int id:questionIds)
@@ -143,16 +144,18 @@ public class QuestionService {
                 questions.add(questionDao.findById(id).get());
             }
 
+
             for(Question  q:questions)
             {
                 QuestionWrapper questionWrapper1 = new QuestionWrapper();
                 questionWrapper1.setId(q.getId());
                 questionWrapper1.setQuestion(q.getQuestion());
-                questionWrapper1.setCategory(q.getCategory());
+                questionWrapper1.setCategory(q.getCategoryName());
                 questionWrapper1.setOption_1(q.getOption_a());
                 questionWrapper1.setOption_2(q.getOption_b());
                 questionWrapper1.setOption_3(q.getOption_c());
                 questionWrapper1.setOption_4(q.getOption_d());
+                questionWrapper1.setDiff_level(q.getDiff_level());
 
                 questionWrapper.add(questionWrapper1);
             }

@@ -6,6 +6,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -23,7 +24,7 @@ public interface QuizInterface {
                                                        @RequestParam("numberOfQuestions") int numberOfQuestions);
 
     @PostMapping("question/getQuestions")
-    public ResponseEntity<List<QuestionWrapper>> getQuestionById(@RequestParam List<Integer> questionIds);
+    public ResponseEntity<List<QuestionWrapper>> getQuestionById(@RequestBody List<Integer> questionIds);
 
 
 

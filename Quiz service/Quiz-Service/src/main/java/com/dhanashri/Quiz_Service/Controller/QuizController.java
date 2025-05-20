@@ -31,15 +31,15 @@ public class QuizController {
         return quizService.generateQuizManual(manualQuizRequest);
     }
 
-    @PostMapping("get/{id}")
+    @GetMapping("get/{id}")
     public ResponseEntity<List<QuestionWrapper>> getQuizQuestions(@PathVariable int id)
     {
         return quizService.getQuizQuestions(id);
     }
 
-    @PostMapping("getQuestionPreview/{id}")
+    @GetMapping("getQuestionPreview/{id}")
     public ResponseEntity<?> getQuizQuestionsForPreview(@PathVariable int id)
     {
-        return quizService.getQuizQuestions(id);
+        return quizService.getQuizQuestionsForPreview(id);
     }
 }

@@ -118,4 +118,24 @@ public class QuizService {
             return ResponseEntity.badRequest().body(new ArrayList<>());
         }
     }
+
+    public ResponseEntity<?> getQuizQuestionsForPreview(int id) {
+        try{
+
+            Quiz quiz = quizDao.findById(id).get();
+            List<QuizQuestion> quizQuestionList = quiz.getQuestions();
+
+            List<Integer> questionIds = quizQuestionList.stream()
+                    .map(QuizQuestion::getQuestion_id)
+                    .collect(Collectors.toList());
+
+            List<QuestionWrapper> questionWrapperList = quizInterface.getQuestionById(questionIds).getBody();
+
+            return new ResponseEntity<>(questionWrapperList,HttpStatus.OK);
+        }
+        catch(Exception e)
+        {
+            return new ResponseEntity("Failed to return the Quesiton for preview",HttpStatus.BAD_REQUEST);
+        }
+    }
 }
