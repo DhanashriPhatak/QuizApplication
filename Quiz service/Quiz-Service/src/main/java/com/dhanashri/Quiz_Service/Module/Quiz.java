@@ -21,7 +21,10 @@ public class Quiz {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int quiz_id;
     private String quiz_title;
-    private LocalDateTime created_at = LocalDateTime.now();
+
+    private boolean isActive=true;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference

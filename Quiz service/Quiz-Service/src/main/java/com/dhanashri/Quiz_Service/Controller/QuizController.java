@@ -42,4 +42,18 @@ public class QuizController {
     {
         return quizService.getQuizQuestionsForPreview(id);
     }
+
+    @GetMapping("getActiveInactiveCount")
+    public ResponseEntity<?> getActiveInactiveCount()
+    {
+        return quizService.getActiveInactiveCount();
+    }
+
+    @GetMapping("quizList")
+    public ResponseEntity<?> getPaginatedQuizzes(@RequestParam boolean isActive,
+                                                 @RequestParam int page,
+                                                 @RequestParam int size)
+    {
+        return quizService.getPaginatedQuizzes(isActive,page,size);
+    }
 }

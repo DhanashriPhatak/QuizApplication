@@ -4,11 +4,18 @@ import com.dhanashri.Quiz_Service.Dao.QuizDao;
 import com.dhanashri.Quiz_Service.Feign.QuizInterface;
 import com.dhanashri.Quiz_Service.Module.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -136,6 +143,36 @@ public class QuizService {
         catch(Exception e)
         {
             return new ResponseEntity("Failed to return the Quesiton for preview",HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public ResponseEntity<?> getActiveInactiveCount() {
+        try{
+            List<QuizStatusCount> quizStatusCountList = quizDao.getQuizStatusCounts();
+            Map<String, Long> result = new HashMap<>();
+            result.put("active", 0L);
+            result.put("inactive", 0L);
+            for (QuizStatusCount qc : quizStatusCountList) {
+                result.put(qc.getIsActive() ? "active" : "inactive", qc.getCount());
+            }
+
+            return new ResponseEntity<>(result,HttpStatus.OK);
+        }
+        catch(Exception e)
+        {
+            return new ResponseEntity<>("Failed to return the active inactive quiz count",HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public ResponseEntity<?> getPaginatedQuizzes(boolean isActive,int page,int size) {
+        try{
+            Pageable pageable = PageRequest.of(page,size, Sort.by("createdAt").descending());
+            Page<Quiz> quizPage = quizDao.findByIsActive(isActive, pageable);
+            return new ResponseEntity<>(quizPage,HttpStatus.OK);
+        }
+        catch(Exception e)
+        {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
         }
     }
 }

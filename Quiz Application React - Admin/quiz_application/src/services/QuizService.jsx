@@ -13,3 +13,8 @@ export const generateQuizManual = (formData) => axios.post(`${QUIZ_BASE_URL}/gen
     },withCredentials:true});
 
 export const getQuizQuestions = (id) => axios.get(`${QUIZ_BASE_URL}/getQuestionPreview/${id}`, {withCredentials: true});
+export const getActiveInactiveCount = () => axios.get(`${QUIZ_BASE_URL}/getActiveInactiveCount`,{withCredentials:true});
+export const getPaginatedQuizzes = (isActive,page=0,size=10)=>axios.get(`${QUIZ_BASE_URL}/quizList`,{
+    params:{
+        isActive,page,size
+    },withCredentials:true});

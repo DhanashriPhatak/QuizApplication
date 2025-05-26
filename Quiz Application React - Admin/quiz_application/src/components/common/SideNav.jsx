@@ -19,10 +19,10 @@ const SideNav = () => {
               <li className="nav-item"> <Link to="/generateQuiz" className="nav-link"> <i className="nav-icon bi bi-patch-question" />
                   <p>Generate a Quiz</p>
                 </Link> </li>
-                <li className="nav-item"> <Link to="/quizHistory" className="nav-link"> 
+                <li className="nav-item"> <Link to="/quiz" className="nav-link"> 
                 {/* <FontAwesomeIcon icon="fa-solid fa-clock-rotate-left" /> */}
-                <i className="nav-icon bi bi-clock-history"></i>
-                  <p>Quiz History</p>
+                <i class="bi bi-journal-text nav-icon" ></i>
+                  <p>Quiz</p>
                 </Link> </li>
                   <li className="nav-item">
                   <Link to="/questions" className="nav-link">
@@ -38,7 +38,7 @@ const SideNav = () => {
                 </li>
                 <li className="nav-item">
                     <Link to="/users" className="nav-link">
-                    <i className="nav-icon bi bi-tags" ></i>
+                    <i class="bi bi-people nav-icon"></i>
                     <p>Users</p>
                     </Link>
                 </li>
