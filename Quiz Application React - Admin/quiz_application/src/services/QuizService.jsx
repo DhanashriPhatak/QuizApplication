@@ -18,3 +18,4 @@ export const getPaginatedQuizzes = (isActive,page=0,size=10)=>axios.get(`${QUIZ_
     params:{
         isActive,page,size
     },withCredentials:true});
+export const getQuizDetails = (id)=>axios.get(`${QUIZ_BASE_URL}/view/${id}`,{withCredentials:true});

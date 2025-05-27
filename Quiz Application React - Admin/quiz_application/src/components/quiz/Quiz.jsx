@@ -14,7 +14,7 @@ const Quiz = () => {
         setError('');
         getActiveInactiveCount()
         .then((res)=>{
-            console.log(res.data);
+            // console.log(res.data);
             setQuizCount(res.data);
             setLoading(false);
             setError('');

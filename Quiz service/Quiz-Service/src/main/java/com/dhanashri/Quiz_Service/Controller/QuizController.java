@@ -5,6 +5,7 @@ import com.dhanashri.Quiz_Service.Module.ManualQuizRequest;
 import com.dhanashri.Quiz_Service.Module.QuestionWrapper;
 import com.dhanashri.Quiz_Service.Module.QuizDTO;
 import com.dhanashri.Quiz_Service.Service.QuizService;
+import jakarta.ws.rs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -55,5 +56,11 @@ public class QuizController {
                                                  @RequestParam int size)
     {
         return quizService.getPaginatedQuizzes(isActive,page,size);
+    }
+
+    @GetMapping("view/{id}")
+    public ResponseEntity<?> getQuizDetailsById(@PathVariable int id)
+    {
+        return quizService.getQuizDetailsById(id);
     }
 }

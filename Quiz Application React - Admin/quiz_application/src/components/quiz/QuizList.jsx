@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Spinner from '../common/Spinner';
 import { getPaginatedQuizzes } from '../../services/QuizService';
+import { useNavigate } from 'react-router-dom';
 
 
 const QuizList = ({status}) => {
@@ -9,7 +10,8 @@ const QuizList = ({status}) => {
   const [quizzes,setQuizzes] = useState([]);
   const [totalPages,setTotalPages] = useState(0);
   const [page,setPage] = useState(0);
-  const [isActive,setIsActive] = useState(true);//toggle for active/inactive quizzes
+  const [isActive,setIsActive] = useState();//toggle for active/inactive quizzes
+  const navigate = useNavigate();
 
   useEffect(()=>{
     setLoading(true);
@@ -27,6 +29,18 @@ const QuizList = ({status}) => {
       setLoading(false);
     })
   },[status,page]);
+
+  const toggleQuizStatus = ()=>{
+    
+  }
+
+  const handleEditQuiz = ()=>{
+    
+  }
+
+  const handleDeleteQuiz = ()=>{
+    
+  }
 
   if (loading) return <Spinner />;
   return (
@@ -50,20 +64,30 @@ const QuizList = ({status}) => {
             <td>{new Date(quiz.createdAt).toLocaleString()}</td>
             <td>{quiz.questions.length}</td>
             <td>
-              <div className="dropdown">
-                <button
-                  className="btn btn-sm btn-secondary dropdown-toggle"
-                  type="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  Actions
-                </button>
-                <ul className="dropdown-menu">
-                  <li><button className="dropdown-item">View</button></li>
-                  <li><button className="dropdown-item">Edit</button></li>
-                  <li><button className="dropdown-item text-danger">Delete</button></li>
-                </ul>
+              <div className="d-flex align-items-center gap-3">
+                <div className="dropdown">
+                  <button
+                    className="btn btn-sm btn-secondary dropdown-toggle"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                  >
+                    Actions
+                  </button>
+                  <ul className="dropdown-menu">
+                    <li><button className="dropdown-item" onClick={()=>navigate(`/quiz/view/${quiz.quiz_id}`)}>View</button></li>
+                    <li><button className="dropdown-item" onClick={()=>handleEditQuiz()}>Edit</button></li>
+                    <li><button className="dropdown-item text-danger" onClick={()=>handleDeleteQuiz()}>Delete</button></li>
+                  </ul>
+                </div>
+                <div className="form-check form-switch">
+                  <input 
+                    className="form-check-input" 
+                    type="checkbox" 
+                    checked={status==='active'}
+                    onChange={() => toggleQuizStatus(quiz.quiz_id)} 
+                  />
+                </div>
               </div>
             </td>
           </tr>

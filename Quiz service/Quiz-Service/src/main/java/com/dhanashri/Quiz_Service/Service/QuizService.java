@@ -12,10 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -51,6 +48,7 @@ public class QuizService {
         catch(Exception e)
         {
 //          return new ResponseEntity<>("Something Went Wrong",HttpStatus.BAD_REQUEST);
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -122,6 +120,7 @@ public class QuizService {
         }
         catch(Exception e)
         {
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(new ArrayList<>());
         }
     }
@@ -142,6 +141,7 @@ public class QuizService {
         }
         catch(Exception e)
         {
+            e.printStackTrace();
             return new ResponseEntity("Failed to return the Quesiton for preview",HttpStatus.BAD_REQUEST);
         }
     }
@@ -160,6 +160,7 @@ public class QuizService {
         }
         catch(Exception e)
         {
+            e.printStackTrace();
             return new ResponseEntity<>("Failed to return the active inactive quiz count",HttpStatus.BAD_REQUEST);
         }
     }
@@ -172,7 +173,49 @@ public class QuizService {
         }
         catch(Exception e)
         {
+            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public ResponseEntity<?> getQuizDetailsById(int quizId) {
+        try{
+            Optional<Quiz> optionalQuiz = quizDao.findById(quizId);
+            if(optionalQuiz.isEmpty())
+            {
+                return new ResponseEntity<>("Quiz Not Found",HttpStatus.NOT_FOUND);
+            }
+            Quiz quiz = optionalQuiz.get();
+            List<Integer> questionIds = quiz.getQuestions().stream()
+                                        .map(QuizQuestion::getQuestion_id)
+                                        .toList();
+
+            ResponseEntity<List<QuestionWrapper>> response = quizInterface.getQuestionById(questionIds);
+            List<QuestionWrapper> questions = response.getBody();
+
+            Map<String, Map<String, Long>> categoryMap = questions.stream()
+                    .collect(Collectors.groupingBy(QuestionWrapper::getCategory,
+                            Collectors.groupingBy(QuestionWrapper::getDiff_level,Collectors.counting())));
+
+            List<CategoryDifficultyPair> summary = new ArrayList<>();
+            categoryMap.forEach((cat,diffMap)->
+                    diffMap.forEach((diff,count)->
+                            summary.add(new CategoryDifficultyPair(cat,diff,count.intValue()))));
+
+            QuizDetailResponse quizDetailResponse = new QuizDetailResponse();
+            quizDetailResponse.setQuizId(quiz.getQuiz_id());
+            quizDetailResponse.setQuizTitle(quiz.getQuiz_title());
+            quizDetailResponse.setActive(quiz.isActive());
+            quizDetailResponse.setCreatedAt(quiz.getCreatedAt());
+            quizDetailResponse.setCategoryDifficultyPairLsit(summary);
+            quizDetailResponse.setQuestionWrapperList(questions);
+
+            return new ResponseEntity<>(quizDetailResponse,HttpStatus.OK);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return new ResponseEntity<>("Failed to fetch Quiz Details",HttpStatus.BAD_REQUEST);
         }
     }
 }
