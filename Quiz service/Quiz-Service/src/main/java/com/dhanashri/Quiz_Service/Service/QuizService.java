@@ -27,10 +27,11 @@ public class QuizService {
     public ResponseEntity<?> createQuiz(QuizDTO quizDTO) {
         try{
             System.out.println("reached here:-");
-            List<Integer> questionIds = quizInterface.getQuestionForQuiz(quizDTO.getCategoryId(),
-                    quizDTO.getNumberOfQuestions()).getBody();
+
+            Set<Integer> questionIds = distributeQuestions(quizDTO.getNumberOfQuestions(),quizDTO.getCategoryId());
             Quiz quiz = new Quiz();
             quiz.setQuiz_title(quizDTO.getQuizTitle());
+            quiz.setMode(quizDTO.getMode()!=null? quizDTO.getMode() : "auto");
             List<QuizQuestion> quizQuestionList = new ArrayList<>();
             assert questionIds != null;
             for(int i:questionIds)
@@ -55,7 +56,7 @@ public class QuizService {
 
     public ResponseEntity<?> generateQuizManual(ManualQuizRequest manualQuizRequest) {
         try{
-            System.out.println("inside service");
+//            System.out.println("inside service");
             List<Integer> allQuestionIds = new ArrayList<>();
             for(ManualQuizDTO manualQuizDTO:manualQuizRequest.getConfigList())
             {
@@ -83,6 +84,7 @@ public class QuizService {
             }
             Quiz quiz = new Quiz();
             quiz.setQuiz_title(manualQuizRequest.getQuizTitle());
+            quiz.setMode(manualQuizRequest.getMode()!=null? manualQuizRequest.getMode() : "manual");
             List<QuizQuestion> quizQuestionList = new ArrayList<>();
 
             for(int id:allQuestionIds)
@@ -103,6 +105,69 @@ public class QuizService {
             e.printStackTrace();
             return new ResponseEntity<>("Failed to Generate a Manual quiz", HttpStatus.BAD_REQUEST);
         }
+    }
+
+    public Set<Integer> distributeQuestions(int totalQuestions,List<Integer> categoryId)
+    {
+        Set<Integer> finalQuestionsId = new HashSet<>();
+        Map<Integer,Set<Integer>> categoryQuestions = new HashMap<>();
+
+        int perCategory = totalQuestions/categoryId.size();
+        int remainder = totalQuestions % categoryId.size();
+
+        //Try to fetch per category question count
+        Map<Integer,Integer> desiredCount = new HashMap<>();
+        for(Integer category:categoryId)
+        {
+            int desired = perCategory + (remainder-- > 0?1:0);
+            desiredCount.put(category,desired);
+        }
+
+        Map<Integer,Integer> shortFallMap = new HashMap<>();
+        for(Integer category:categoryId)
+        {
+            int desired = desiredCount.get(category);
+            List<Integer> fetched = quizInterface.getQuestionForQuiz(category,desired).getBody();
+
+            if(fetched==null || fetched.isEmpty())
+            {
+                continue;
+            }
+
+            finalQuestionsId.addAll(fetched);
+            categoryQuestions.put(category,new HashSet<>(fetched));
+
+            int shortFall = desired-fetched.size();
+            if(shortFall>0)
+            {
+                shortFallMap.put(category,shortFall);
+            }
+        }
+
+        //redistribute remaining questions
+        int stillNeeded = totalQuestions - finalQuestionsId.size();
+
+        for(Integer category:categoryId)
+        {
+            if(stillNeeded<=0)break;
+
+            Set<Integer> alreadyFetched = categoryQuestions.getOrDefault(category,new HashSet<>());
+            int alreadyCount = alreadyFetched.size();
+            int maxToAsk = totalQuestions;
+
+            List<Integer> more = quizInterface.getQuestionForQuiz(category,maxToAsk).getBody();
+            if(more==null || more.isEmpty())
+            {
+                continue;
+            }
+
+            more.removeAll(alreadyFetched);
+            int takecount = Math.min(stillNeeded,more.size());
+            finalQuestionsId.addAll(more.subList(0,takecount));
+            stillNeeded-=takecount;
+        }
+
+        return finalQuestionsId;
     }
 
     public ResponseEntity<List<QuestionWrapper>> getQuizQuestions(int id) {
@@ -207,8 +272,9 @@ public class QuizService {
             quizDetailResponse.setQuizTitle(quiz.getQuiz_title());
             quizDetailResponse.setActive(quiz.isActive());
             quizDetailResponse.setCreatedAt(quiz.getCreatedAt());
-            quizDetailResponse.setCategoryDifficultyPairLsit(summary);
+            quizDetailResponse.setCategoryDifficultyPairList(summary);
             quizDetailResponse.setQuestionWrapperList(questions);
+            quizDetailResponse.setMode(quiz.getMode());
 
             return new ResponseEntity<>(quizDetailResponse,HttpStatus.OK);
         }
@@ -218,4 +284,6 @@ public class QuizService {
             return new ResponseEntity<>("Failed to fetch Quiz Details",HttpStatus.BAD_REQUEST);
         }
     }
+
+
 }

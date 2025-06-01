@@ -26,6 +26,9 @@ public class Quiz {
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Column(name = "mode")
+    private String mode;
+
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<QuizQuestion> questions = new ArrayList<>();

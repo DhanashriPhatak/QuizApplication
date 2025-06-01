@@ -11,5 +11,6 @@ import java.util.List;
 @NoArgsConstructor
 public class ManualQuizRequest {
     private String quizTitle;
-    private List<ManualQuizDTO> configList;  //
+    private List<ManualQuizDTO> configList;
+    private String mode;//
 }
