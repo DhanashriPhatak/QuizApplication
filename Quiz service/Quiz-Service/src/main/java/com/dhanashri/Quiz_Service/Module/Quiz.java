@@ -32,4 +32,9 @@ public class Quiz {
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<QuizQuestion> questions = new ArrayList<>();
+
+    public void setQuestions(List<QuizQuestion> questions) {
+        this.questions.clear();
+        this.questions.addAll(questions);
+    }
 }

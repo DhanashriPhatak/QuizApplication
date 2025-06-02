@@ -286,4 +286,97 @@ public class QuizService {
     }
 
 
+    public ResponseEntity<?> updateQuiz(QuizDTO quizDTO) {
+        try{
+            if(quizDTO.getQuizId() == null)
+            {
+                return ResponseEntity.badRequest().body("Quiz id is required for update");
+            }
+            Optional<Quiz> optionalQuiz = quizDao.findById(quizDTO.getQuizId());
+            if(optionalQuiz.isEmpty())
+            {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Quiz Not Found");
+            }
+            Quiz quiz = optionalQuiz.get();
+            quiz.setQuiz_title(quizDTO.getQuizTitle());
+            quiz.setMode("auto");
+
+//            quiz.getQuestions().clear();
+            Set<Integer> questionIds = distributeQuestions(quizDTO.getNumberOfQuestions(),quizDTO.getCategoryId());
+            List<QuizQuestion> quizQuestionList = questionIds.stream().map(id->{
+                QuizQuestion quizQuestion = new QuizQuestion();
+                quizQuestion.setQuestion_id(id);
+                quizQuestion.setQuiz(quiz);
+                return quizQuestion;
+            }).toList();
+
+            quiz.setQuestions(quizQuestionList);
+            quizDao.save(quiz);
+            return new ResponseEntity<>(quiz.getQuiz_id(),HttpStatus.OK);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return new ResponseEntity<>("Failed to update quiz",HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public ResponseEntity<?> updateManualQuiz(ManualQuizRequest manualQuizRequest) {
+        try{
+            if(manualQuizRequest.getQuizId() == null)
+            {
+                return ResponseEntity.badRequest().body("Quiz id is required for update");
+            }
+            Optional<Quiz> optionalQuiz = quizDao.findById(manualQuizRequest.getQuizId());
+            if(optionalQuiz.isEmpty())
+            {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Quiz Not Found");
+            }
+            Quiz quiz = optionalQuiz.get();
+            quiz.setQuiz_title(manualQuizRequest.getQuizTitle());
+            quiz.setMode("manual");
+//            quiz.getQuestions().clear();
+
+            List<Integer> allQuestionIds = new ArrayList<>();
+            for(ManualQuizDTO manualQuizDTO:manualQuizRequest.getConfigList())
+            {
+                ResponseEntity<?> idsResponse = null;
+                if(manualQuizDTO.getDiffLevel().equals("Random"))
+                {
+                    idsResponse = quizInterface.getQuestionForQuiz(manualQuizDTO.getCategoryId()
+                            ,manualQuizDTO.getNumberOfQuestions());
+                }
+                else {
+                    idsResponse = quizInterface.getQuestionsForManualQuiz(manualQuizDTO.getCategoryId(),
+                            manualQuizDTO.getDiffLevel(),manualQuizDTO.getNumberOfQuestions());
+                }
+
+                if(idsResponse .getStatusCode().is2xxSuccessful())
+                {
+                    List<Integer> ids = (List<Integer>) idsResponse .getBody();
+                    if (ids != null) {
+                        allQuestionIds.addAll(ids);
+                    }
+                }
+                else {
+                    return new ResponseEntity<>("Failed to fetch questions for Manual quiz", HttpStatus.BAD_REQUEST);
+                }
+            }
+            List<QuizQuestion> quizQuestionList = allQuestionIds.stream().map(id->{
+                QuizQuestion quizQuestion = new QuizQuestion();
+                quizQuestion.setQuestion_id(id);
+                quizQuestion.setQuiz(quiz);
+                return quizQuestion;
+            }).toList();
+            quiz.setQuestions(quizQuestionList);
+            quizDao.save(quiz);
+
+            return new ResponseEntity<>(quiz.getQuiz_id(),HttpStatus.OK);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return  new ResponseEntity<>("Failed to update Manual quiz",HttpStatus.BAD_REQUEST);
+        }
+    }
 }

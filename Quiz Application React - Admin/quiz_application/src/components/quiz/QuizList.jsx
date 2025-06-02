@@ -34,8 +34,8 @@ const QuizList = ({status}) => {
     
   }
 
-  const handleEditQuiz = ()=>{
-    
+  const handleEditQuiz = (quizId,mode)=>{
+    navigate(`/generateQuiz/${quizId}?mode=${mode}`);
   }
 
   const handleDeleteQuiz = ()=>{
@@ -76,7 +76,7 @@ const QuizList = ({status}) => {
                   </button>
                   <ul className="dropdown-menu">
                     <li><button className="dropdown-item" onClick={()=>navigate(`/quiz/view/${quiz.quiz_id}`)}>View</button></li>
-                    <li><button className="dropdown-item" onClick={()=>handleEditQuiz()}>Edit</button></li>
+                    <li><button className="dropdown-item" onClick={()=>handleEditQuiz(quiz.quiz_id,quiz.mode)}>Edit</button></li>
                     <li><button className="dropdown-item text-danger" onClick={()=>handleDeleteQuiz()}>Delete</button></li>
                   </ul>
                 </div>

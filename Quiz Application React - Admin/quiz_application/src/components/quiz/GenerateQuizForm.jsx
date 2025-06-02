@@ -1,14 +1,16 @@
 import React from 'react';
 import { useState ,useEffect} from 'react';
 import { getActiveQuestionCountByCategory } from '../../services/QuestionService';
-import { generateQuiz,generateQuizManual} from '../../services/QuizService';
+import { generateQuiz,generateQuizManual,updateQuiz,updateQuizManual} from '../../services/QuizService';
 import Spinner from '../common/Spinner';
 import ShowToast from '../common/ShowToast';
+import { useNavigate } from 'react-router-dom';
 
-const GenerateQuizForm = ({onPreviewUpdate}) => {
+const GenerateQuizForm = ({editMode=false, initialData = null, onPreviewUpdate}) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [errors,setErrors] = useState({});
+    const navigate = useNavigate();
 
     const [formData,setFormData] = useState({
         quizName:'',
@@ -40,6 +42,62 @@ const GenerateQuizForm = ({onPreviewUpdate}) => {
               }));
             setCategories(mapped);
             setError('');
+
+            if(editMode && initialData)
+            {
+                console.log("initial Data:-",initialData);
+                const nameToMap = {};
+                mapped.forEach(c=>{
+                    nameToMap[c.category.trim().toLowerCase()] = c.id;
+                })
+
+                const updatedCategoryConfig = {};
+                const selectedCategories = [];
+                let total = 0;
+                const groupedCategoryData = {};
+                (initialData.categoryDifficultyPairList || []).forEach(pair=>{
+                    const key = pair.categoryName.trim().toLowerCase();
+                    const categoryId = nameToMap[key];
+                    if (categoryId === undefined) {
+                        console.warn(`Category "${pair.categoryName}" not found in active categories`);
+                        return; // Don't break app, just warn
+                    }
+                    
+                    if(!groupedCategoryData[categoryId]){
+                        groupedCategoryData[categoryId] = {
+                            count:0,
+                            difficulties:new Set()
+                        };
+                    }
+
+                    groupedCategoryData[categoryId].count +=parseInt(pair.count,10);
+                    groupedCategoryData[categoryId].difficulties.add(pair.diffLevel);
+
+                    // console.log("Count for category id:-",categoryId," count:-",pair.count);
+                    total+=pair.count;
+                    
+                });
+
+                for(const[catId,data] of Object.entries(groupedCategoryData))
+                {
+                    const difficulty = data.difficulties.size===1 ? [...data.difficulties][0] : 'Random';
+
+                    updatedCategoryConfig[catId] = {
+                        difficulty,
+                        count :data.count
+                    };
+                    selectedCategories.push(parseInt(catId));
+                }
+
+                setFormData({
+                    quizName: initialData.quizTitle,
+                    totalQuestions: total,
+                    selectedCategories: selectedCategories,
+                    categoryConfig: updatedCategoryConfig,
+                    mode: initialData.mode || 'manual'
+                });
+                
+            }
         })
         .catch((error)=>{
             setError("Failed to fetch categories");
@@ -47,7 +105,8 @@ const GenerateQuizForm = ({onPreviewUpdate}) => {
         .finally(()=>{
             setLoading(false);
         })
-    },[]);
+    },[initialData]);
+    
     /**END :- populate categories */
     /**START - Save the entered data  */
     const handleChange = (e)=>{
@@ -182,6 +241,7 @@ const GenerateQuizForm = ({onPreviewUpdate}) => {
         {
             payload = {
                 quizTitle:formData.quizName,
+                mode:formData.mode,
                 configList: formData.selectedCategories.map((catId)=>({
                     categoryId:catId,
                     diffLevel:formData.categoryConfig[catId].difficulty,
@@ -189,16 +249,32 @@ const GenerateQuizForm = ({onPreviewUpdate}) => {
                     }))
                 };
             console.log("payload:-",payload);
-            response = generateQuizManual(payload);
+            if(editMode)
+            {
+                payload.quizId = initialData.quizId;
+                response = updateQuizManual(payload);
+            }
+            else{
+                response = generateQuizManual(payload);
+            }
         }
         else{
             payload = {
-            categoryId: formData.selectedCategories[0], 
+            categoryId: [...formData.selectedCategories], 
             quizTitle: formData.quizName,
+            mode:formData.mode,
             numberOfQuestions: parseInt(formData.totalQuestions),
             };
             console.log("payload:-",payload);
-            response = generateQuiz(payload);
+            if(editMode)
+            {
+                payload.quizId = initialData.quizId;
+                response = updateQuiz(payload);
+            }
+            else{
+                response = generateQuiz(payload);
+            }
+            
         }
         response
         .then((res)=>{
@@ -245,9 +321,14 @@ const GenerateQuizForm = ({onPreviewUpdate}) => {
         <>
         {error &&  <div className="alert alert-danger">{error}</div>}
         <div className="card card-info card-outline">
-            <div className="card-header">
-                <h3 className="card-title">Quiz</h3>
-            </div>
+            {editMode && (
+                <div className="alert alert-warning mt-2">
+                    You are currently editing this quiz. Changes will overwrite the original.
+                </div>
+            )}
+            {/* <div className="card-header">
+                <h3 className="card-title">{editMode ?'Edit Quiz' :'Generate New Quiz'}</h3>
+            </div> */}
             <div className="needs-validation" >
                 <div className="card-body">
                     <div className="row g-3">
@@ -385,7 +466,14 @@ const GenerateQuizForm = ({onPreviewUpdate}) => {
                 </div>
                 <div className="card-footer d-flex justify-content-end gap-2">
                     <button className="btn btn-secondary" type="button" onClick={handleReset}>Reset Form</button>
-                    <button className="btn btn-info" type="button" onClick={handleSubmit}>Generate Quiz Preview</button>
+                    <button className="btn btn-info" type="button" onClick={handleSubmit}>
+                        {editMode ? 'Save Changes & Regenerate Preview' :'Generate Quiz Preview'}
+                    </button>
+                    {editMode && (
+                        <button className="btn btn-outline-secondary" onClick={() => navigate('/quiz')}>
+                    Cancel Editing
+                    </button>
+                   )}
                 </div>
                 </div>
             {/* </form> */}

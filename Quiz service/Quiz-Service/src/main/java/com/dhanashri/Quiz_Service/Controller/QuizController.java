@@ -1,9 +1,6 @@
 package com.dhanashri.Quiz_Service.Controller;
 
-import com.dhanashri.Quiz_Service.Module.ManualQuizDTO;
-import com.dhanashri.Quiz_Service.Module.ManualQuizRequest;
-import com.dhanashri.Quiz_Service.Module.QuestionWrapper;
-import com.dhanashri.Quiz_Service.Module.QuizDTO;
+import com.dhanashri.Quiz_Service.Module.*;
 import com.dhanashri.Quiz_Service.Service.QuizService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -87,4 +84,23 @@ public class QuizController {
     {
         return quizService.getQuizDetailsById(id);
     }
+
+    @Operation(summary = "Update auto mode quiz",
+    description = "update the quiz details for auto mode quiz.")
+    @PostMapping("update")
+    public ResponseEntity<?> updateQuiz(@RequestBody QuizDTO quizDTO)
+    {
+        return quizService.updateQuiz(quizDTO);
+    }
+
+
+    @Operation(summary = "Update Manual mode quiz",
+            description = "update the quiz details for Manual mode quiz.")
+    @PostMapping("update/manual")
+    public ResponseEntity<?> updateManualQuiz(@RequestBody ManualQuizRequest manualQuizRequest)
+    {
+        return quizService.updateManualQuiz(manualQuizRequest);
+    }
+
+
 }

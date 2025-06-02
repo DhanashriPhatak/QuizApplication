@@ -19,3 +19,11 @@ export const getPaginatedQuizzes = (isActive,page=0,size=10)=>axios.get(`${QUIZ_
         isActive,page,size
     },withCredentials:true});
 export const getQuizDetails = (id)=>axios.get(`${QUIZ_BASE_URL}/view/${id}`,{withCredentials:true});
+export const updateQuiz = (formData)=>axios.post(`${QUIZ_BASE_URL}/update`,formData,{
+    headers:{
+        'Content-Type':'application/json'
+    }, withCredentials:true});
+export const updateQuizManual = (formData)=>axios.post(`${QUIZ_BASE_URL}/update/manual`,formData,{
+    headers:{
+        'Content-Type':'application/json'
+    },withCredentials:true});

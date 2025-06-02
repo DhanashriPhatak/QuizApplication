@@ -14,6 +14,7 @@ const AppRoutes = () => {
     <Routes>
         <Route path="/" element={<MainLayout />}>
           <Route index element={<NotFoundPage />} /> {/* DashbaordPage*/}
+          <Route path="generateQuiz/:id" element={<GenerateQuizPage />} />
           <Route path="generateQuiz" element={<GenerateQuizPage />} />
           <Route path="quiz" element={<QuizPage />} />
           <Route path="quiz/view/:id" element={<ViewQuizPage/>} />
