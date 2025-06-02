@@ -105,8 +105,19 @@ const GenerateQuizForm = ({editMode=false, initialData = null, onPreviewUpdate})
         .finally(()=>{
             setLoading(false);
         })
-    },[initialData]);
-    
+    },[editMode,initialData]);
+     useEffect(() => {
+        if (!editMode && initialData === null) {
+            setFormData({
+                quizName: '',
+                totalQuestions: '',
+                selectedCategories: [],
+                categoryConfig: {},
+                mode: 'auto'
+            });
+            setErrors({});
+        }
+    }, [editMode, initialData]);
     /**END :- populate categories */
     /**START - Save the entered data  */
     const handleChange = (e)=>{

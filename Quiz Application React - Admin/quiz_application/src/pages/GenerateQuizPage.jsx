@@ -14,6 +14,12 @@ const GenerateQuizPage = () => {
   const isEditMode = !!id;
 
   useEffect(()=>{
+    if(!id)
+    {
+      setQuizId(null);
+      setInitialQuizData(null);
+      return;
+    }
     if(isEditMode && id)
     {
         setQuizId(id); 
@@ -40,7 +46,7 @@ const GenerateQuizPage = () => {
             {/* <div className="my-3 border-top border-2"></div> */}
             <div className="col-lg-6 col-md-12">
               <h3 className="mb-3 fw-bold">Quiz Preview</h3>
-              <QuizPreviewPanel quizId={quizId} previewMode={true}/>
+              <QuizPreviewPanel quizId={quizId} previewMode={!!quizId}/>
             </div>
           </div>
         </div>
