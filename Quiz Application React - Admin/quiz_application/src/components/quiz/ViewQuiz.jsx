@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import Spinner from '../common/Spinner';
 import { getQuizDetails } from '../../services/QuizService';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,useParams  } from 'react-router-dom';
 
-const ViewQuiz = ({quizId}) => {
+const ViewQuiz = () => {
+    const { quizId } = useParams();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -18,6 +19,7 @@ const ViewQuiz = ({quizId}) => {
         setLoading(true);
         getQuizDetails(quizId)
         .then(res=>{
+            console.log("Response:", res);
             setQuiz(res.data);
             setError('');
         })
@@ -53,7 +55,7 @@ const ViewQuiz = ({quizId}) => {
             <div className="card-body">
                 <h5>Category-wise Breakdown</h5>
                 <ul>
-                {quiz.categoryDifficultyPairLsit.map((item, idx) => (
+                {quiz.categoryDifficultyPairList.map((item, idx) => (
                     <li key={idx}>
                     <strong>{item.categoryName}</strong> – {item.diffLevel} ({item.count} questions)
                     </li>

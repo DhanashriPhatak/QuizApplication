@@ -17,7 +17,7 @@ const AppRoutes = () => {
           <Route path="generateQuiz/:id" element={<GenerateQuizPage />} />
           <Route path="generateQuiz" element={<GenerateQuizPage />} />
           <Route path="quiz" element={<QuizPage />} />
-          <Route path="quiz/view/:id" element={<ViewQuizPage/>} />
+          <Route path="quiz/view/:quizId" element={<ViewQuizPage/>} />
           <Route path="questions" element={<QuestionsPage />} />
           <Route path="categories" element={<CategoriesPage/>} />
           <Route path="users" element={<NotFoundPage/>}/>
