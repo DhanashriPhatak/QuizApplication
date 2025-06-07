@@ -102,5 +102,12 @@ public class QuizController {
         return quizService.updateManualQuiz(manualQuizRequest);
     }
 
+    @Operation(summary = "Delete Quiz" ,
+    description = "Delete a quiz by its id")
+    @DeleteMapping("delete/{id}")
+    public ResponseEntity<?> deleteQuiz(@PathVariable int id)
+    {
+        return quizService.deleteQuiz(id);
+    }
 
 }

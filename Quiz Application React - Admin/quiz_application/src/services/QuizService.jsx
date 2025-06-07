@@ -27,3 +27,4 @@ export const updateQuizManual = (formData)=>axios.post(`${QUIZ_BASE_URL}/update/
     headers:{
         'Content-Type':'application/json'
     },withCredentials:true});
+export const deleteQuiz = (id)=>axios.delete(`${QUIZ_BASE_URL}/delete/${id}`,{withCredentials:true});

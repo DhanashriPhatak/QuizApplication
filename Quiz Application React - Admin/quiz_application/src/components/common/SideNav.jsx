@@ -6,7 +6,15 @@ const SideNav = () => {
     <>
       <aside className="app-sidebar bg-body-secondary shadow" data-bs-theme="dark"> {/*begin::Sidebar Brand*/}
         <div className="sidebar-brand"> {/*begin::Brand Link*/} 
-          <Link to="/" className="brand-link"> {/*begin::Brand Image*/} <img src="../../dist/assets/img/AdminLTELogo.png" alt="AdminLTE Logo" className="brand-image opacity-75 shadow" /> {/*end::Brand Image*/} {/*begin::Brand Text*/} <span className="brand-text fw-light">AdminLTE 4</span> {/*end::Brand Text*/} </Link> {/*end::Brand Link*/} </div> {/*end::Sidebar Brand*/} {/*begin::Sidebar Wrapper*/}
+          <div className="d-flex align-items-center gap-2">
+            <Link to="/" className="brand-link"> {/*begin::Brand Image*/} 
+              <img src="../../dist/assets/img/logo.png" alt="QuizCrafter Logo" className="brand-image img-fluid shadow"
+              style={{ maxHeight: '40px', height: 'auto', width: 'auto' }} /> 
+              {/*end::Brand Image*/} {/*begin::Brand Text*/} 
+              <span className="brand-text fw-light">QuizCrafter</span> {/*end::Brand Text*/} 
+              </Link>
+        </div>
+           {/*end::Brand Link*/} </div> {/*end::Sidebar Brand*/} {/*begin::Sidebar Wrapper*/}
         <div className="sidebar-wrapper" >
           <nav className="mt-2"> {/*begin::Sidebar Menu*/}
             <ul className="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">

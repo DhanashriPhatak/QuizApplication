@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import Spinner from '../common/Spinner';
-import { getPaginatedQuizzes } from '../../services/QuizService';
+import { getPaginatedQuizzes , deleteQuiz } from '../../services/QuizService';
 import { useNavigate } from 'react-router-dom';
-
+import ShowToast from '../common/ShowToast';
 
 const QuizList = ({status}) => {
   const [loading, setLoading] = useState(false);
@@ -38,10 +38,32 @@ const QuizList = ({status}) => {
     navigate(`/generateQuiz/${quizId}?mode=${mode}`);
   }
 
-  const handleDeleteQuiz = ()=>{
-    
+  /**Start- Delete a quiz */
+  const [showConfirmModal,setShowConfirmModal] = useState(false);
+  const [deleteTargetId,setDeleteTargetId] = useState(null);
+  const [deletingId,setDeletingId] = useState(null);
+  const handleDeleteQuiz = (e,id)=>{
+    e.stopPropagation();
+    setDeleteTargetId(id);
+    setShowConfirmModal(true);
   }
-
+  const handleDeleteConfirmed = ()=>{
+      setDeletingId(deleteTargetId);
+      deleteQuiz(deleteTargetId)
+      .then(()=>{
+          setQuizzes(prev =>prev.filter(q=>q.quiz_id!==deleteTargetId));
+          ShowToast({type:'success',title:'Success',message:'Question deleted successfully.'})
+      })
+      .catch((error)=>{
+          ShowToast({ type: 'error', title: 'Error', message: 'Failed to delete question. Try again.' });
+      })
+      .finally(() => {
+          setDeletingId(null);
+          setDeleteTargetId(null);
+          setShowConfirmModal(false);
+      });
+  }
+  /**End- Delete a quiz */
   if (loading) return <Spinner />;
   return (
     <>
@@ -77,7 +99,7 @@ const QuizList = ({status}) => {
                   <ul className="dropdown-menu">
                     <li><button className="dropdown-item" onClick={()=>navigate(`/quiz/view/${quiz.quiz_id}`)}>View</button></li>
                     <li><button className="dropdown-item" onClick={()=>handleEditQuiz(quiz.quiz_id,quiz.mode)}>Edit</button></li>
-                    <li><button className="dropdown-item text-danger" onClick={()=>handleDeleteQuiz()}>Delete</button></li>
+                    <li><button className="dropdown-item text-danger" onClick={(e)=>handleDeleteQuiz(e,quiz.quiz_id)}>Delete</button></li>
                   </ul>
                 </div>
                 <div className="form-check form-switch">
@@ -110,6 +132,27 @@ const QuizList = ({status}) => {
         </li>
       </ul>
     </div>
+    {showConfirmModal && (
+      <div className="modal fade show d-block" tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div className="modal-dialog" role="document">
+          <div className="modal-content">
+            <div className="modal-header bg-danger text-white">
+              <h5 className="modal-title">Confirm Delete</h5>
+              <button type="button" className="btn-close" onClick={() => setShowConfirmModal(false)}></button>
+            </div>
+            <div className="modal-body">
+                Are you sure you want to delete this Quiz?
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={() => setShowConfirmModal(false)}>Cancel</button>
+              <button type="button" className="btn btn-danger" onClick={handleDeleteConfirmed}>
+                  {deletingId ? <Spinner /> : 'Yes, Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
     </>
   )
 }

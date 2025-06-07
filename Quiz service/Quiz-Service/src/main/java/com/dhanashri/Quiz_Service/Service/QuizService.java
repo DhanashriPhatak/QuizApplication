@@ -250,6 +250,7 @@ public class QuizService {
             {
                 return new ResponseEntity<>("Quiz Not Found",HttpStatus.NOT_FOUND);
             }
+            System.out.println("Inside get quiz details by id");
             Quiz quiz = optionalQuiz.get();
             List<Integer> questionIds = quiz.getQuestions().stream()
                                         .map(QuizQuestion::getQuestion_id)
@@ -263,9 +264,17 @@ public class QuizService {
                             Collectors.groupingBy(QuestionWrapper::getDiff_level,Collectors.counting())));
 
             List<CategoryDifficultyPair> summary = new ArrayList<>();
-            categoryMap.forEach((cat,diffMap)->
-                    diffMap.forEach((diff,count)->
-                            summary.add(new CategoryDifficultyPair(cat,diff,count.intValue()))));
+            categoryMap.forEach((cat,diffMap)->{
+                if("auto".equalsIgnoreCase(quiz.getMode())){
+                    int total = diffMap.values().stream().mapToInt(Long::intValue).sum();
+                    summary.add(new CategoryDifficultyPair(cat,"Random",total));
+                }
+                else {
+                    diffMap.forEach((diff,count)->{
+                        summary.add(new CategoryDifficultyPair(cat,diff,count.intValue()));
+                    });
+                }
+            });
 
             QuizDetailResponse quizDetailResponse = new QuizDetailResponse();
             quizDetailResponse.setQuizId(quiz.getQuiz_id());
@@ -377,6 +386,22 @@ public class QuizService {
         {
             e.printStackTrace();
             return  new ResponseEntity<>("Failed to update Manual quiz",HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public ResponseEntity<?> deleteQuiz(int id) {
+        try{
+            if(!quizDao.existsById(id))
+            {
+                return  new ResponseEntity<>("Quiz Not found by this Id",HttpStatus.NOT_FOUND);
+            }
+            quizDao.deleteById(id);
+            return new ResponseEntity<>("Quiz Deleted successfully",HttpStatus.OK);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return new ResponseEntity<>("Unable to delete the quiz.",HttpStatus.BAD_REQUEST);
         }
     }
 }
