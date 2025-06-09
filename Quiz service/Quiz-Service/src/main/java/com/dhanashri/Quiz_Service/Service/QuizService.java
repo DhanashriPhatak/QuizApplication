@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,10 +25,42 @@ public class QuizService {
     @Autowired
     QuizInterface quizInterface;
 
+    @Transactional
+    public Quiz createNewVersion(Quiz oldQuiz, String title,String mode, List<Integer> questionIds)
+    {
+        try{
+            //mark old quiz as inactcive
+            oldQuiz.setActive(false);
+            quizDao.save(oldQuiz);
+
+            //create a new quiz
+            Quiz newQuiz = new Quiz();
+            newQuiz.setQuiz_title(title);
+            newQuiz.setMode(mode);
+            newQuiz.setVersion(oldQuiz.getVersion()+1);
+            newQuiz.setPreviousVersionId(oldQuiz.getQuiz_id());
+            newQuiz.setActive(true);
+
+            List<QuizQuestion> quizQuestionList = questionIds.stream().map(id->{
+                QuizQuestion quizQuestion = new QuizQuestion();
+                quizQuestion.setQuestion_id(id);
+                quizQuestion.setQuiz(newQuiz);
+                return quizQuestion;
+            }).toList();
+
+            newQuiz.setQuestions(quizQuestionList);
+            return quizDao.save(newQuiz);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace(); // Optional
+            throw new RuntimeException("Failed to create new quiz version", e);
+        }
+    }
+
+
     public ResponseEntity<?> createQuiz(QuizDTO quizDTO) {
         try{
-            System.out.println("reached here:-");
-
             Set<Integer> questionIds = distributeQuestions(quizDTO.getNumberOfQuestions(),quizDTO.getCategoryId());
             Quiz quiz = new Quiz();
             quiz.setQuiz_title(quizDTO.getQuizTitle());
@@ -170,7 +203,7 @@ public class QuizService {
         return finalQuestionsId;
     }
 
-    public ResponseEntity<List<QuestionWrapper>> getQuizQuestions(int id) {
+    public ResponseEntity<List<QuestionWrapper>> getQuizQuestions(Long id) {
         try{
 
             Quiz quiz = quizDao.findById(id).get();
@@ -190,7 +223,7 @@ public class QuizService {
         }
     }
 
-    public ResponseEntity<?> getQuizQuestionsForPreview(int id) {
+    public ResponseEntity<?> getQuizQuestionsForPreview(Long id) {
         try{
 
             Quiz quiz = quizDao.findById(id).get();
@@ -233,7 +266,7 @@ public class QuizService {
     public ResponseEntity<?> getPaginatedQuizzes(boolean isActive,int page,int size) {
         try{
             Pageable pageable = PageRequest.of(page,size, Sort.by("createdAt").descending());
-            Page<Quiz> quizPage = quizDao.findByIsActive(isActive, pageable);
+            Page<Quiz> quizPage = quizDao.findLatestQuizzes(isActive, pageable);
             return new ResponseEntity<>(quizPage,HttpStatus.OK);
         }
         catch(Exception e)
@@ -243,7 +276,7 @@ public class QuizService {
         }
     }
 
-    public ResponseEntity<?> getQuizDetailsById(int quizId) {
+    public ResponseEntity<?> getQuizDetailsById(Long quizId) {
         try{
             Optional<Quiz> optionalQuiz = quizDao.findById(quizId);
             if(optionalQuiz.isEmpty())
@@ -294,7 +327,7 @@ public class QuizService {
         }
     }
 
-
+    @Transactional
     public ResponseEntity<?> updateQuiz(QuizDTO quizDTO) {
         try{
             if(quizDTO.getQuizId() == null)
@@ -306,22 +339,21 @@ public class QuizService {
             {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Quiz Not Found");
             }
-            Quiz quiz = optionalQuiz.get();
-            quiz.setQuiz_title(quizDTO.getQuizTitle());
-            quiz.setMode("auto");
+            Quiz oldQuiz = optionalQuiz.get();
 
-//            quiz.getQuestions().clear();
             Set<Integer> questionIds = distributeQuestions(quizDTO.getNumberOfQuestions(),quizDTO.getCategoryId());
-            List<QuizQuestion> quizQuestionList = questionIds.stream().map(id->{
-                QuizQuestion quizQuestion = new QuizQuestion();
-                quizQuestion.setQuestion_id(id);
-                quizQuestion.setQuiz(quiz);
-                return quizQuestion;
-            }).toList();
+            Quiz newQuiz = createNewVersion(oldQuiz,quizDTO.getQuizTitle(),"auto",new ArrayList<>(questionIds));
 
-            quiz.setQuestions(quizQuestionList);
-            quizDao.save(quiz);
-            return new ResponseEntity<>(quiz.getQuiz_id(),HttpStatus.OK);
+//            List<QuizQuestion> quizQuestionList = questionIds.stream().map(id->{
+//                QuizQuestion quizQuestion = new QuizQuestion();
+//                quizQuestion.setQuestion_id(id);
+//                quizQuestion.setQuiz(quiz);
+//                return quizQuestion;
+//            }).toList();
+//
+//            quiz.setQuestions(quizQuestionList);
+//            quizDao.save(quiz);
+            return new ResponseEntity<>(newQuiz.getQuiz_id(),HttpStatus.OK);
         }
         catch(Exception e)
         {
@@ -330,6 +362,7 @@ public class QuizService {
         }
     }
 
+    @Transactional
     public ResponseEntity<?> updateManualQuiz(ManualQuizRequest manualQuizRequest) {
         try{
             if(manualQuizRequest.getQuizId() == null)
@@ -341,10 +374,7 @@ public class QuizService {
             {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Quiz Not Found");
             }
-            Quiz quiz = optionalQuiz.get();
-            quiz.setQuiz_title(manualQuizRequest.getQuizTitle());
-            quiz.setMode("manual");
-//            quiz.getQuestions().clear();
+
 
             List<Integer> allQuestionIds = new ArrayList<>();
             for(ManualQuizDTO manualQuizDTO:manualQuizRequest.getConfigList())
@@ -371,16 +401,18 @@ public class QuizService {
                     return new ResponseEntity<>("Failed to fetch questions for Manual quiz", HttpStatus.BAD_REQUEST);
                 }
             }
-            List<QuizQuestion> quizQuestionList = allQuestionIds.stream().map(id->{
-                QuizQuestion quizQuestion = new QuizQuestion();
-                quizQuestion.setQuestion_id(id);
-                quizQuestion.setQuiz(quiz);
-                return quizQuestion;
-            }).toList();
-            quiz.setQuestions(quizQuestionList);
-            quizDao.save(quiz);
+            Quiz oldQuiz = optionalQuiz.get();
+            Quiz newQuiz = createNewVersion(oldQuiz,manualQuizRequest.getQuizTitle(),"manual",allQuestionIds);
+//            List<QuizQuestion> quizQuestionList = allQuestionIds.stream().map(id->{
+//                QuizQuestion quizQuestion = new QuizQuestion();
+//                quizQuestion.setQuestion_id(id);
+//                quizQuestion.setQuiz(quiz);
+//                return quizQuestion;
+//            }).toList();
+//            quiz.setQuestions(quizQuestionList);
+//            quizDao.save(quiz);
 
-            return new ResponseEntity<>(quiz.getQuiz_id(),HttpStatus.OK);
+            return new ResponseEntity<>(newQuiz.getQuiz_id(),HttpStatus.OK);
         }
         catch(Exception e)
         {
@@ -389,7 +421,8 @@ public class QuizService {
         }
     }
 
-    public ResponseEntity<?> deleteQuiz(int id) {
+    @Transactional
+    public ResponseEntity<?> deleteQuiz(Long id) {
         try{
             if(!quizDao.existsById(id))
             {
@@ -404,4 +437,15 @@ public class QuizService {
             return new ResponseEntity<>("Unable to delete the quiz.",HttpStatus.BAD_REQUEST);
         }
     }
+
+    public List<Quiz> getQuizVersionHistory(Long quizId) {
+        List<Quiz> history = new ArrayList<>();
+        Quiz current = quizDao.findById(quizId).orElseThrow();
+        while (current.getPreviousVersionId() != null) {
+            current = quizDao.findById(current.getPreviousVersionId()).orElseThrow();
+            history.add(current);
+        }
+        return history;
+    }
+
 }

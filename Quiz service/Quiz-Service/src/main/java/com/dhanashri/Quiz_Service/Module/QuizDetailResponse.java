@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class QuizDetailResponse {
-    private int quizId;
+    private Long quizId;
     private String quizTitle;
     private LocalDateTime createdAt;
     private boolean isActive;

@@ -10,7 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ManualQuizRequest {
-    private Integer quizId;
+    private Long quizId;
     private String quizTitle;
     private List<ManualQuizDTO> configList;
     private String mode;//

@@ -19,12 +19,8 @@ public class Quiz {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int quiz_id;
+    private Long quiz_id;
     private String quiz_title;
-
-    private boolean isActive=true;
-    @Column(name = "created_at")
-    private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "mode")
     private String mode;
@@ -32,6 +28,18 @@ public class Quiz {
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<QuizQuestion> questions = new ArrayList<>();
+
+    @Column(nullable = false)
+    private boolean isActive=true;
+
+    @Column(nullable = false)
+    private Long version =1L;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name="previous_version_id")
+    private Long previousVersionId;
 
     public void setQuestions(List<QuizQuestion> questions) {
         this.questions.clear();

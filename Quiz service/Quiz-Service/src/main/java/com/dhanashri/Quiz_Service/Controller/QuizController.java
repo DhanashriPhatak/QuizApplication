@@ -46,7 +46,7 @@ public class QuizController {
     @Operation(summary = "Get quiz questions by quiz ID",
             description = "Retrieves all questions for the given quiz ID.")
     @GetMapping("get/{id}")
-    public ResponseEntity<List<QuestionWrapper>> getQuizQuestions(@PathVariable int id)
+    public ResponseEntity<List<QuestionWrapper>> getQuizQuestions(@PathVariable Long id)
     {
         return quizService.getQuizQuestions(id);
     }
@@ -56,7 +56,7 @@ public class QuizController {
     @GetMapping("getQuestionPreview/{id}")
     public ResponseEntity<?> getQuizQuestionsForPreview(
             @Parameter(description = "Quiz ID", required = true)
-            @PathVariable int id)
+            @PathVariable Long id)
     {
         return quizService.getQuizQuestionsForPreview(id);
     }
@@ -80,7 +80,7 @@ public class QuizController {
     @Operation(summary = "Get quiz details by ID",
             description = "Fetches the complete quiz details including questions and metadata.")
     @GetMapping("view/{id}")
-    public ResponseEntity<?> getQuizDetailsById(@PathVariable int id)
+    public ResponseEntity<?> getQuizDetailsById(@PathVariable Long id)
     {
         return quizService.getQuizDetailsById(id);
     }
@@ -105,7 +105,7 @@ public class QuizController {
     @Operation(summary = "Delete Quiz" ,
     description = "Delete a quiz by its id")
     @DeleteMapping("delete/{id}")
-    public ResponseEntity<?> deleteQuiz(@PathVariable int id)
+    public ResponseEntity<?> deleteQuiz(@PathVariable Long id)
     {
         return quizService.deleteQuiz(id);
     }

@@ -16,7 +16,7 @@ public class QuizQuestion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer quiz_question_id;
+    private Long quiz_question_id;
 
     @ManyToOne
     @JoinColumn(name="quiz_id")
