@@ -438,14 +438,29 @@ public class QuizService {
         }
     }
 
-    public List<Quiz> getQuizVersionHistory(Long quizId) {
-        List<Quiz> history = new ArrayList<>();
-        Quiz current = quizDao.findById(quizId).orElseThrow();
-        while (current.getPreviousVersionId() != null) {
-            current = quizDao.findById(current.getPreviousVersionId()).orElseThrow();
+    public ResponseEntity<?> getQuizHistory(Long quizId) {
+        try{
+            List<Quiz> history = new ArrayList<>();
+            Quiz current = quizDao.findById(quizId).orElseThrow();
             history.add(current);
+
+            while(current.getPreviousVersionId() != null)
+            {
+                current = quizDao.findById(current.getPreviousVersionId()).orElseThrow();
+                history.add(current);
+            }
+
+            history.sort(Comparator.comparingLong(Quiz::getVersion).reversed());
+
+            return new ResponseEntity<>(history,HttpStatus.OK);
         }
-        return history;
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return new ResponseEntity<>("Failed to fetch the Quiz History",HttpStatus.BAD_REQUEST);
+        }
+
     }
+
 
 }

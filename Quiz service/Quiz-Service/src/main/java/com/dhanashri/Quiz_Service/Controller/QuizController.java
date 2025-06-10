@@ -110,4 +110,9 @@ public class QuizController {
         return quizService.deleteQuiz(id);
     }
 
+    @GetMapping("{quizId}/history")
+    public ResponseEntity<?> getQuizHistory(@PathVariable Long quizId)
+    {
+        return quizService.getQuizHistory(quizId);
+    }
 }

@@ -35,4 +35,5 @@ public interface QuizDao extends JpaRepository<Quiz,Long> {
     ORDER BY q.createdAt DESC
     """)
     Page<Quiz> findLatestQuizzes(@Param("isActive") boolean isActive, Pageable pageable);
+
 }

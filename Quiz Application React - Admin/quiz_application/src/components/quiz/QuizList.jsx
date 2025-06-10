@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import Spinner from '../common/Spinner';
-import { getPaginatedQuizzes , deleteQuiz } from '../../services/QuizService';
+import { getPaginatedQuizzes , deleteQuiz, getQuizHistory } from '../../services/QuizService';
 import { useNavigate } from 'react-router-dom';
 import ShowToast from '../common/ShowToast';
 
@@ -31,7 +31,7 @@ const QuizList = ({status}) => {
   },[status,page]);
 
   const toggleQuizStatus = ()=>{
-    
+
   }
 
   const handleEditQuiz = (quizId,mode)=>{
@@ -64,6 +64,28 @@ const QuizList = ({status}) => {
       });
   }
   /**End- Delete a quiz */
+  /** Start- view Wuiz history */
+  const [showHistoryModal,setShowHistoryModal] = useState(false);
+  const [history, setHistory] = useState([]);
+  const [selectedQuizTitle,setSelectedQuizTitle] = useState('');
+  const handleViewHistory = (quizId,title)=>{
+    setLoading(true);
+    getQuizHistory(quizId)
+    .then(res=>{
+      console.log(res.data);
+      setHistory(res.data);
+      setSelectedQuizTitle(title);
+      setShowHistoryModal(true);
+    })
+    .catch(err=>{
+      ShowToast({ type: 'error', title: 'Error', message: 'Failed to fetch history. Try again.' });
+    })
+    .finally(()=>{
+      setLoading(false);
+    })
+  }
+  /** End- view Wuiz history */
+
   if (loading) return <Spinner />;
   return (
     <>
@@ -100,6 +122,7 @@ const QuizList = ({status}) => {
                     <li><button className="dropdown-item" onClick={()=>navigate(`/quiz/view/${quiz.quiz_id}`)}>View</button></li>
                     <li><button className="dropdown-item" onClick={()=>handleEditQuiz(quiz.quiz_id,quiz.mode)}>Edit</button></li>
                     <li><button className="dropdown-item text-danger" onClick={(e)=>handleDeleteQuiz(e,quiz.quiz_id)}>Delete</button></li>
+                    <li><button className="dropdown-item " onClick={(e)=>handleViewHistory(quiz.quiz_id,quiz.quiz_title)}>View History</button></li>
                   </ul>
                 </div>
                 <div className="form-check form-switch">
@@ -148,6 +171,47 @@ const QuizList = ({status}) => {
               <button type="button" className="btn btn-danger" onClick={handleDeleteConfirmed}>
                   {deletingId ? <Spinner /> : 'Yes, Delete'}
               </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+    {showHistoryModal && (
+      <div className="modal fade show d-block" tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div className="modal-dialog modal-lg" role="document">
+          <div className="modal-content">
+            <div className="modal-header bg-primary text-white">
+              <h5 className="modal-title">History of: {selectedQuizTitle}</h5>
+              <button type="button" className="btn-close" onClick={() => setShowHistoryModal(false)}></button>
+            </div>
+            <div className="modal-body">
+              {history.length === 0 ? (
+                <p>No history available.</p>
+              ) : (
+                <table className="table table-bordered">
+                  <thead>
+                    <tr>
+                      <th>Version</th>
+                      <th>Created At</th>
+                      <th>Mode</th>
+                      <th>Title</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {history.map((h, i) => (
+                      <tr key={i}>
+                        <td>{h.version}</td>
+                        <td>{new Date(h.createdAt).toLocaleString()}</td>
+                        <td>{h.mode}</td>
+                        <td>{h.quiz_title}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-secondary" onClick={() => setShowHistoryModal(false)}>Close</button>
             </div>
           </div>
         </div>
