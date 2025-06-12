@@ -110,9 +110,27 @@ public class QuizController {
         return quizService.deleteQuiz(id);
     }
 
+    @Operation(summary = "View Quiz History" ,
+            description = "View quiz History by its id")
     @GetMapping("{quizId}/history")
     public ResponseEntity<?> getQuizHistory(@PathVariable Long quizId)
     {
         return quizService.getQuizHistory(quizId);
+    }
+
+    @Operation(summary = "Activate quiz" ,
+            description = "activate quiz from history and make the all other inactive in version lineage")
+    @PutMapping("activate/{quizId}")
+    public ResponseEntity<?> activateQuiz(@PathVariable Long quizId)
+    {
+        return quizService.activateQuiz(quizId);
+    }
+
+    @Operation(summary = "deactivate quiz" ,
+            description = "deactivate quiz from Active tab")
+    @PutMapping("deactivate/{quizId}")
+    public ResponseEntity<?> deactivateQuiz(@PathVariable Long quizId)
+    {
+        return quizService.deactivateQuiz(quizId);
     }
 }

@@ -13,27 +13,50 @@ import java.util.List;
 
 public interface QuizDao extends JpaRepository<Quiz,Long> {
 
-    @Query("SELECT q.isActive as isActive, COUNT(q) as count " +
-            "FROM Quiz q " +
-            "WHERE NOT EXISTS (SELECT 1 FROM Quiz q2 WHERE q2.previousVersionId = q.quiz_id) " +
-            "GROUP BY q.isActive")
-    List<QuizStatusCount> getQuizStatusCounts();
+//    @Query("SELECT q.isActive as isActive, COUNT(q) as count " +
+//            "FROM Quiz q " +
+//            "WHERE NOT EXISTS (SELECT 1 FROM Quiz q2 WHERE q2.previousVersionId = q.quiz_id) " +
+//            "GROUP BY q.isActive")
+//    List<QuizStatusCount> getQuizStatusCounts();
 
 //    Page<Quiz> findByIsActive(boolean isactive, Pageable pageable);
 
-    List<Quiz> findByPreviousVersionId(int previousVersionId);
-    List<Quiz> findByIsActiveTrue();
+    List<Quiz> findByPreviousVersionId(Long previousVersionId);
 
+    @Query("""
+    SELECT q FROM Quiz q WHERE q.isActive = :isActive ORDER BY q.createdAt DESC
+    """)
+    Page<Quiz> findLatestQuizzes(@Param("isActive") boolean isActive, Pageable pageable);
+    /**
+     * SELECT q FROM Quiz q
+     *     WHERE NOT EXISTS (
+     *         SELECT 1 FROM Quiz q2
+     *         WHERE q2.previousVersionId = q.quiz_id
+     *     )
+     *     AND q.isActive = :isActive
+     *     ORDER BY q.createdAt DESC
+     */
 
     @Query("""
     SELECT q FROM Quiz q
-    WHERE NOT EXISTS (
+    WHERE q.isActive = false
+      AND NOT EXISTS (
         SELECT 1 FROM Quiz q2
         WHERE q2.previousVersionId = q.quiz_id
-    )
-    AND q.isActive = :isActive
+      )
     ORDER BY q.createdAt DESC
     """)
-    Page<Quiz> findLatestQuizzes(@Param("isActive") boolean isActive, Pageable pageable);
+    Page<Quiz> findStandaloneInactiveQuizzes(Pageable pageable);
 
+    @Query("SELECT COUNT(q) FROM Quiz q WHERE q.isActive = true")
+    Long countAllActiveQuizzes();
+
+    @Query("""
+    SELECT COUNT(q) FROM Quiz q
+    WHERE q.isActive = false
+      AND NOT EXISTS (
+        SELECT 1 FROM Quiz q2 WHERE q2.previousVersionId = q.quiz_id
+      )
+    """)
+    Long countStandaloneInactiveQuizzes();
 }

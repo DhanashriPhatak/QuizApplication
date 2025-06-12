@@ -8,6 +8,7 @@ const Quiz = () => {
     const [error, setError] = useState('');
     const [activeTab,setActiveTab] = useState("active");
     const [quizCount,setQuizCount] = useState([]);
+    const [reloadTrigger,setReloadTrigger]  =useState(0);
 
     useEffect(()=>{
         setLoading(true);
@@ -24,6 +25,10 @@ const Quiz = () => {
             setLoading(false);
         })
     },[]);
+
+    const handleReloadTrigger = ()=>{
+        setReloadTrigger(prev=>prev+1);
+    }
 
     if (loading) return <Spinner />;
 
@@ -63,10 +68,10 @@ const Quiz = () => {
             <div className="card-body">
                 <div className="tab-content">
                 <div className={`tab-pane ${activeTab === 'active' ? 'active' : ''}`} id="active">
-                    <QuizList status="active" />
+                    <QuizList status="active" reloadTrigger={reloadTrigger} onReload={handleReloadTrigger}/>
                 </div>
                 <div className={`tab-pane ${activeTab === 'inactive' ? 'active' : ''}`} id="inactive">
-                    <QuizList status="inactive" />
+                    <QuizList status="inactive" reloadTrigger={reloadTrigger} onReload={handleReloadTrigger}/>
                 </div>
                 </div>
             </div>

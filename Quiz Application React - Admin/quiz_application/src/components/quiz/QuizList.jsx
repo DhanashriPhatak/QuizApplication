@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import Spinner from '../common/Spinner';
-import { getPaginatedQuizzes , deleteQuiz, getQuizHistory } from '../../services/QuizService';
+import { getPaginatedQuizzes , deleteQuiz, getQuizHistory, activateQuizVersion, deactivateQuiz } from '../../services/QuizService';
 import { useNavigate } from 'react-router-dom';
 import ShowToast from '../common/ShowToast';
+import ConfirmModal from '../common/ConfirmModal';
 
-const QuizList = ({status}) => {
+const QuizList = ({status,reloadTrigger,onReload}) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [quizzes,setQuizzes] = useState([]);
@@ -13,25 +14,42 @@ const QuizList = ({status}) => {
   const [isActive,setIsActive] = useState();//toggle for active/inactive quizzes
   const navigate = useNavigate();
 
+  const loadQuizzes = ()=>{
+     setLoading(true);
+      getPaginatedQuizzes(status==="active",page)
+      .then((res)=>{
+        console.log("🚀 Loaded quizzes after activation:", res.data.content);
+        setQuizzes(res.data.content);
+        setTotalPages(res.data.totalPages);
+        setError('');
+      })
+      .catch((err)=>{
+        setError("Failed to load Quizzes");
+      })
+      .finally(()=>{
+        setLoading(false);
+      })
+  }
   useEffect(()=>{
+   loadQuizzes();
+  },[status,page,reloadTrigger]);
+
+  const toggleQuizStatus = (quizId)=>{
+    if(status != "active") return;
     setLoading(true);
-    getPaginatedQuizzes(status==="active",page)
-    .then((res)=>{
-      setQuizzes(res.data.content);
-      setTotalPages(res.data.totalPages);
-      setError('');
+    deactivateQuiz(quizId)
+    .then(()=>{
+      ShowToast({type:'success',title:'Success',message:'Quiz marked as Inactivate'});
+      loadQuizzes();
+      if(onReload)onReload();
     })
     .catch((err)=>{
       console.log(err);
-      setError("Failed to load Quizzes");
+      ShowToast({ type: 'error', title: 'Error', message: 'Failed to update quiz status.' });
     })
-    .finally(()=>{
+    .finally(() => {
       setLoading(false);
-    })
-  },[status,page]);
-
-  const toggleQuizStatus = ()=>{
-
+    });
   }
 
   const handleEditQuiz = (quizId,mode)=>{
@@ -51,7 +69,8 @@ const QuizList = ({status}) => {
       setDeletingId(deleteTargetId);
       deleteQuiz(deleteTargetId)
       .then(()=>{
-          setQuizzes(prev =>prev.filter(q=>q.quiz_id!==deleteTargetId));
+          if (onReload) onReload(); 
+          // setQuizzes(prev =>prev.filter(q=>q.quiz_id!==deleteTargetId));
           ShowToast({type:'success',title:'Success',message:'Question deleted successfully.'})
       })
       .catch((error)=>{
@@ -64,7 +83,7 @@ const QuizList = ({status}) => {
       });
   }
   /**End- Delete a quiz */
-  /** Start- view Wuiz history */
+  /** Start- view quiz history */
   const [showHistoryModal,setShowHistoryModal] = useState(false);
   const [history, setHistory] = useState([]);
   const [selectedQuizTitle,setSelectedQuizTitle] = useState('');
@@ -72,7 +91,6 @@ const QuizList = ({status}) => {
     setLoading(true);
     getQuizHistory(quizId)
     .then(res=>{
-      console.log(res.data);
       setHistory(res.data);
       setSelectedQuizTitle(title);
       setShowHistoryModal(true);
@@ -85,6 +103,40 @@ const QuizList = ({status}) => {
     })
   }
   /** End- view Wuiz history */
+  /**Start - activate from history */
+  const [showConfirmActivateModal,setShowConfirmActivateModal] = useState(false);
+  const [selectedVersionId,setSelectedVersionId] = useState(null);
+  const [activating,setActivating] = useState(false);
+  const handleActivateVersion = (quizId)=>{
+    setSelectedVersionId(quizId);
+    setShowConfirmActivateModal(true);
+  }
+  const handleConfirmActivateVersion = ()=>{
+    setActivating(true);
+    setLoading(true);
+    activateQuizVersion(selectedVersionId)
+    .then(()=>{
+      ShowToast({type:'success',title:'Success',message:'Quiz version activated successfully.'});
+      // setReloadTrigger(prev=>prev+1);
+      // console.log("✅ Activation succeeded. Calling loadQuizzes()...");
+      loadQuizzes();
+      if(onReload)onReload();
+      return getQuizHistory(selectedVersionId);
+    })
+    .then((res)=>{
+      // console.log("📜 Updated history:", res.data);
+      setHistory(res.data);
+    })
+    .catch((err)=>{
+      ShowToast({type:'error',title:'Error',message:'Failed to activate version. Try again later.'});
+    })
+    .finally(()=>{
+      setActivating(false);
+      setLoading(false);
+      setShowConfirmActivateModal(false);
+    });
+  };
+  /**End - activate from history */
 
   if (loading) return <Spinner />;
   return (
@@ -120,19 +172,23 @@ const QuizList = ({status}) => {
                   </button>
                   <ul className="dropdown-menu">
                     <li><button className="dropdown-item" onClick={()=>navigate(`/quiz/view/${quiz.quiz_id}`)}>View</button></li>
-                    <li><button className="dropdown-item" onClick={()=>handleEditQuiz(quiz.quiz_id,quiz.mode)}>Edit</button></li>
+                    {status=== 'active' && (
+                      <li><button className="dropdown-item" onClick={()=>handleEditQuiz(quiz.quiz_id,quiz.mode)}>Edit</button></li>
+                    )}
                     <li><button className="dropdown-item text-danger" onClick={(e)=>handleDeleteQuiz(e,quiz.quiz_id)}>Delete</button></li>
                     <li><button className="dropdown-item " onClick={(e)=>handleViewHistory(quiz.quiz_id,quiz.quiz_title)}>View History</button></li>
                   </ul>
                 </div>
-                <div className="form-check form-switch">
-                  <input 
-                    className="form-check-input" 
-                    type="checkbox" 
-                    checked={status==='active'}
-                    onChange={() => toggleQuizStatus(quiz.quiz_id)} 
-                  />
-                </div>
+                {status === 'active' && (
+                  <div className="form-check form-switch">
+                    <input 
+                      className="form-check-input" 
+                      type="checkbox" 
+                      checked={status === 'active'}
+                      onChange={() => toggleQuizStatus(quiz.quiz_id)} 
+                    />
+                  </div>
+                )}
               </div>
             </td>
           </tr>
@@ -156,25 +212,16 @@ const QuizList = ({status}) => {
       </ul>
     </div>
     {showConfirmModal && (
-      <div className="modal fade show d-block" tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-        <div className="modal-dialog" role="document">
-          <div className="modal-content">
-            <div className="modal-header bg-danger text-white">
-              <h5 className="modal-title">Confirm Delete</h5>
-              <button type="button" className="btn-close" onClick={() => setShowConfirmModal(false)}></button>
-            </div>
-            <div className="modal-body">
-                Are you sure you want to delete this Quiz?
-            </div>
-            <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" onClick={() => setShowConfirmModal(false)}>Cancel</button>
-              <button type="button" className="btn btn-danger" onClick={handleDeleteConfirmed}>
-                  {deletingId ? <Spinner /> : 'Yes, Delete'}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ConfirmModal
+        title="Confirm Delete"
+        message="Are you sure you want to delete this Quiz?"
+        show={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={handleDeleteConfirmed}
+        confirmText="Yes, Delete"
+        confirmBtnClass="btn-danger"
+        loading={deletingId}
+      />
     )}
     {showHistoryModal && (
       <div className="modal fade show d-block" tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
@@ -195,6 +242,8 @@ const QuizList = ({status}) => {
                       <th>Created At</th>
                       <th>Mode</th>
                       <th>Title</th>
+                      <th>Status</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -204,6 +253,30 @@ const QuizList = ({status}) => {
                         <td>{new Date(h.createdAt).toLocaleString()}</td>
                         <td>{h.mode}</td>
                         <td>{h.quiz_title}</td>
+                        <td>{h.active ?(
+                          <span className="badge bg-success">Active</span>
+                        ):
+                        (
+                          <span className="badge bg-secondary">Inactive</span>
+                        )}</td>
+                        <td>
+                          <div className="d-flex gap-2">
+                            <button
+                              className="btn btn-sm btn-outline-primary"
+                              onClick={() => window.open(`/quiz/view/${h.quiz_id}`, '_blank')}
+                            >
+                              View
+                            </button>
+                            {!h.active && (
+                              <button
+                                className="btn btn-sm btn-outline-success"
+                                onClick={() => handleActivateVersion(h.quiz_id)}
+                              >
+                                Activate
+                              </button>
+                            )}
+                          </div>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -216,6 +289,18 @@ const QuizList = ({status}) => {
           </div>
         </div>
       </div>
+    )}
+    {showConfirmActivateModal && (
+      <ConfirmModal
+        title="Activate Quiz Version"
+        message="This will deactivate the currently active version. Proceed?"
+        show={showConfirmActivateModal}
+        onClose={() => setShowConfirmActivateModal(false)}
+        onConfirm={handleConfirmActivateVersion}
+        confirmText="Yes, Activate"
+        confirmBtnClass="btn-success"
+        loading={activating}
+      />
     )}
     </>
   )

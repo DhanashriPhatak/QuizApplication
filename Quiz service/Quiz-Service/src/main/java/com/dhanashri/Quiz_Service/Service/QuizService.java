@@ -246,13 +246,11 @@ public class QuizService {
 
     public ResponseEntity<?> getActiveInactiveCount() {
         try{
-            List<QuizStatusCount> quizStatusCountList = quizDao.getQuizStatusCounts();
+            Long active = quizDao.countAllActiveQuizzes();
+            Long inactive = quizDao.countStandaloneInactiveQuizzes();
             Map<String, Long> result = new HashMap<>();
-            result.put("active", 0L);
-            result.put("inactive", 0L);
-            for (QuizStatusCount qc : quizStatusCountList) {
-                result.put(qc.getIsActive() ? "active" : "inactive", qc.getCount());
-            }
+            result.put("active", active);
+            result.put("inactive", inactive);
 
             return new ResponseEntity<>(result,HttpStatus.OK);
         }
@@ -266,7 +264,14 @@ public class QuizService {
     public ResponseEntity<?> getPaginatedQuizzes(boolean isActive,int page,int size) {
         try{
             Pageable pageable = PageRequest.of(page,size, Sort.by("createdAt").descending());
-            Page<Quiz> quizPage = quizDao.findLatestQuizzes(isActive, pageable);
+            Page<Quiz> quizPage;
+            if(isActive)
+            {
+                quizPage = quizDao.findLatestQuizzes(true, pageable);
+            }
+            else {
+                quizPage = quizDao.findStandaloneInactiveQuizzes(pageable);
+            }
             return new ResponseEntity<>(quizPage,HttpStatus.OK);
         }
         catch(Exception e)
@@ -438,29 +443,129 @@ public class QuizService {
         }
     }
 
+    private List<Quiz> getVersionHistoryChain(Long quizId)
+    {
+        List<Quiz> history = new ArrayList<>();
+        Quiz current = quizDao.findById(quizId).orElseThrow();
+        history.add(current);
+
+        while(current.getPreviousVersionId()!=null)
+        {
+            current = quizDao.findById(current.getPreviousVersionId()).orElseThrow();
+            history.add(current);
+        }
+
+        return history;
+    }
+
+    private List<Quiz> getAllDescendants(Long quizId)
+    {
+        List<Quiz> descendants = new ArrayList<>();
+        Queue<Quiz> quizQueue = new LinkedList<>();
+
+        Quiz root = quizDao.findById(quizId).orElseThrow();
+        quizQueue.add(root);
+
+        while(!quizQueue.isEmpty())
+        {
+            Quiz current = quizQueue.poll();
+            List<Quiz> children = quizDao.findByPreviousVersionId(current.getQuiz_id());
+            quizQueue.addAll(children);
+            descendants.addAll(children);
+        }
+        return descendants;
+    }
+
     public ResponseEntity<?> getQuizHistory(Long quizId) {
         try{
-            List<Quiz> history = new ArrayList<>();
-            Quiz current = quizDao.findById(quizId).orElseThrow();
-            history.add(current);
+            //upward chain
+            List<Quiz> upward = getVersionHistoryChain(quizId);
+            //get root
+            Quiz root = upward.get(upward.size()-1);
 
-            while(current.getPreviousVersionId() != null)
+            //downward chain
+            List<Quiz> downward = getAllDescendants(root.getQuiz_id());
+
+            //combine
+            Set<Long> seen = new HashSet<>();
+            List<Quiz> fullChain = new ArrayList<>();
+
+            for(Quiz q:upward)
             {
-                current = quizDao.findById(current.getPreviousVersionId()).orElseThrow();
-                history.add(current);
+                if(seen.add(q.getQuiz_id()))
+                {
+                    fullChain.add(q);
+                }
             }
+            for(Quiz q:downward)
+            {
+                if(seen.add(q.getQuiz_id()))
+                {
+                    fullChain.add(q);
+                }
+            }
+            fullChain.sort(Comparator.comparingLong(Quiz::getVersion).reversed());
 
-            history.sort(Comparator.comparingLong(Quiz::getVersion).reversed());
-
-            return new ResponseEntity<>(history,HttpStatus.OK);
+            return new ResponseEntity<>(fullChain,HttpStatus.OK);
         }
         catch(Exception e)
         {
             e.printStackTrace();
             return new ResponseEntity<>("Failed to fetch the Quiz History",HttpStatus.BAD_REQUEST);
         }
-
     }
 
+    @Transactional
+    public ResponseEntity<?> activateQuiz(Long quizId) {
+        try{
+            Quiz quizToActivate = quizDao.findById(quizId).orElseThrow(()->new RuntimeException("Quiz Not Found with Quiz Id:-"+quizId));
 
+            //fetch all versions in the chain including current version
+            List<Quiz> upward = getVersionHistoryChain(quizId);
+
+            //get root
+            Quiz root = upward.get(upward.size()-1);
+
+            //from root traverse down to get full version chain
+            Queue<Quiz> quizQueue = new LinkedList<>();
+            List<Quiz> fullChain = new ArrayList<>();
+            quizQueue.add(root);
+
+            while(!quizQueue.isEmpty())
+            {
+                Quiz current = quizQueue.poll();
+                fullChain.add(current);
+
+                List<Quiz> children = quizDao.findByPreviousVersionId(current.getQuiz_id());
+                quizQueue.addAll(children);
+            }
+
+            //deactivate all
+            fullChain.forEach(q->q.setActive(false));
+
+            //Activate the requested quiz id
+            quizToActivate.setActive(true);
+            quizDao.saveAll(fullChain);
+            return new ResponseEntity<>("Quiz version activated successfully", HttpStatus.OK);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return new ResponseEntity<>("Failed to activate the Quiz Version",HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public ResponseEntity<?> deactivateQuiz(Long quizId) {
+        try{
+            Quiz quiz = quizDao.findById(quizId).orElseThrow(()->new RuntimeException("Quiz not found"));
+            quiz.setActive(false);
+            quizDao.save(quiz);
+            return new ResponseEntity<>("Quiz Deactivated Successfully",HttpStatus.OK);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return new ResponseEntity<>("Failed to deactivate the quiz. Please Try again.",HttpStatus.BAD_REQUEST);
+        }
+    }
 }

@@ -29,3 +29,5 @@ export const updateQuizManual = (formData)=>axios.post(`${QUIZ_BASE_URL}/update/
     },withCredentials:true});
 export const deleteQuiz = (id)=>axios.delete(`${QUIZ_BASE_URL}/delete/${id}`,{withCredentials:true});
 export const getQuizHistory = (quizId)=>axios.get(`${QUIZ_BASE_URL}/${quizId}/history`,{withCredentials:true});
+export const activateQuizVersion = (quizId)=>axios.put(`${QUIZ_BASE_URL}/activate/${quizId}`,{withCredentials:true});
+export const deactivateQuiz = (quizId)=>axios.put(`${QUIZ_BASE_URL}/deactivate/${quizId}`,{withCredentials:true});
