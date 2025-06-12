@@ -49,7 +49,7 @@ public class QuestionController {
             @ApiResponse(responseCode = "404", description = "Question not found")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteQuesiton(@PathVariable int id)
+    public ResponseEntity<String> deleteQuesiton(@PathVariable Long id)
     {
         return questionService.deleteQuestion(id);
     }
@@ -60,7 +60,7 @@ public class QuestionController {
             @ApiResponse(responseCode = "404", description = "Question not found")
     })
     @GetMapping("getQuestion/{id}")
-    public ResponseEntity<QuestionWrapper> getQuesitonById(@PathVariable int id)
+    public ResponseEntity<QuestionWrapper> getQuesitonById(@PathVariable Long id)
     {
         return questionService.getQuesitonById(id);
     }
@@ -95,7 +95,7 @@ public class QuestionController {
             @ApiResponse(responseCode = "400", description = "Invalid category ID or number of questions")
     })
     @GetMapping("generateQuiz")
-    public ResponseEntity<List<Integer>> getQuestionsForQuiz(@RequestParam int categoryId,
+    public ResponseEntity<?> getQuestionsForQuiz(@RequestParam int categoryId,
                                                              @RequestParam int numberOfQuestions)
     {
         return questionService.getQuestionsForQuiz(categoryId,numberOfQuestions);
@@ -126,7 +126,7 @@ public class QuestionController {
             @ApiResponse(responseCode = "400", description = "Invalid input question IDs")
     })
     @PostMapping("getQuestions")
-    public ResponseEntity<List<QuestionWrapper>> getQuestionsFromId(@RequestBody List<Integer> questionIds)
+    public ResponseEntity<List<QuestionWrapper>> getQuestionsFromId(@RequestBody List<Long> questionIds)
     {
         return questionService.getQuestionsFromId(questionIds);
     }
@@ -154,9 +154,15 @@ public class QuestionController {
             @ApiResponse(responseCode = "404", description = "Question ID not found")
     })
     @PutMapping("toggle/{id}")
-    public ResponseEntity<?> toggleQuestionStatus(@PathVariable int id)
+    public ResponseEntity<?> toggleQuestionStatus(@PathVariable Long id)
     {
         return questionService.toggleQuestionStatus(id);
+    }
+
+    @PostMapping("validateQuestions")
+    public ResponseEntity<?> validateQuestions(@RequestBody List<Long> questionsIds)
+    {
+        return questionService.validateQuestions(questionsIds);
     }
 
 }

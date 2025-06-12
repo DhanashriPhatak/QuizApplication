@@ -16,7 +16,7 @@ public class Question {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "category_id", referencedColumnName = "id")
@@ -29,7 +29,7 @@ public class Question {
     private String option_c;
     private String option_d;
     private String ans;
-    private int isActive;
+    private boolean isActive;
 
     @JsonProperty("category_id")
     public int getCategoryId() {

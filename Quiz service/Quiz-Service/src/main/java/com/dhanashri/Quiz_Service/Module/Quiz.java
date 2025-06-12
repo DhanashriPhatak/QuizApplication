@@ -29,6 +29,9 @@ public class Quiz {
     @JsonManagedReference
     private List<QuizQuestion> questions = new ArrayList<>();
 
+    @Column(name="total_Questions")
+    private int total_Questions;
+
     @Column(nullable = false)
     private boolean isActive=true;
 
@@ -40,6 +43,7 @@ public class Quiz {
 
     @Column(name="previous_version_id")
     private Long previousVersionId;
+
 
     public void setQuestions(List<QuizQuestion> questions) {
         this.questions.clear();

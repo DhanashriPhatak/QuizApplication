@@ -17,16 +17,17 @@ import AddQuestionModal from './AddQuestionModal';
    /**Start - Toggle question Active/Inactice */
    const [updatingId,setUpdatingId] = useState(null);
     const handleToggle = (id,currentStatus)=>{
+        if(updatingId)return;
         setUpdatingId(id);
         toggleQuestion(id)
         .then((res)=>{
             const updatedStatus = currentStatus === 1 ? 0 : 1;
             setQuestions(prevQuestions =>
                 prevQuestions.map(q =>
-                q.id === id ? { ...q, isActive: updatedStatus } : q
+                q.id === id ? { ...q, active: updatedStatus } : q
                 )
             );
-            console.log("questions:-",questions);
+            // console.log("questions:-",questions);
             const status = currentStatus===0 ? 'ACTIVE' : 'INACTIVE';
             const msg = `Question marked as ${status}`;
             ShowToast({ type: 'success', title: 'Success', message: msg });
@@ -81,10 +82,11 @@ import AddQuestionModal from './AddQuestionModal';
         <>
             <div className="accordion" id={accordionId}>
                 {questions.map((q,index)=>{
+                    // console.log(q);
                     const collapseId =  `collapse-${categoryId}-${index}`;
                     const headingId = `heading-${categoryId}-${index}`;
                     return (
-                        <div className="accordion-item" key={index}>
+                        <div className="accordion-item" key={q.id}>
                             <h2 className="accordion-header" id={headingId}> 
                                 <div className="d-flex justify-content-between align-items-center w-100 px-3 py-2">
                                     <button className="accordion-button flex-grow-1 mb-0"
@@ -99,10 +101,10 @@ import AddQuestionModal from './AddQuestionModal';
                                         {updatingId === q.id ? (
                                         <Spinner /> 
                                         ) :
-                                        (<span title={q.isActive ? "Active" : "Inactive"}>
+                                        (<span title={q.active ? "Active" : "Inactive"}>
                                         <Switch
-                                            checked={q.isActive === 1}
-                                            onChange={() => handleToggle(q.id,q.isActive)}
+                                            checked={q.active}
+                                            onChange={() => handleToggle(q.id,q.active)}
                                             onColor="#00C851"
                                             offColor="#ff4444"
                                             uncheckedIcon={false}
@@ -214,7 +216,7 @@ import AddQuestionModal from './AddQuestionModal';
         </>
 )}
 
-export default AccordionList;
+export default React.memo(AccordionList);
 
 
 {/* <div className="accordion-item">

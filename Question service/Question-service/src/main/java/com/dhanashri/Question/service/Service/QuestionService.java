@@ -8,9 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CancellationException;
 
 @Service
@@ -48,7 +46,7 @@ public class QuestionService {
         }
     }
 
-    public ResponseEntity<String> deleteQuestion(int id) {
+    public ResponseEntity<String> deleteQuestion(Long id) {
         try{
             questionDao.deleteById(id);
             return new ResponseEntity<>("Success",HttpStatus.OK);
@@ -60,7 +58,7 @@ public class QuestionService {
         }
     }
 
-    public ResponseEntity<QuestionWrapper> getQuesitonById(int id) {
+    public ResponseEntity<QuestionWrapper> getQuesitonById(Long id) {
         QuestionWrapper questionWrapper = new QuestionWrapper();
         try{
             Optional<Question> questionOptional = questionDao.findById(id);
@@ -107,10 +105,9 @@ public class QuestionService {
         }
     }
 
-    public ResponseEntity<List<Integer>> getQuestionsForQuiz(int categoryId, int numberOfQuestions) {
+    public ResponseEntity<?> getQuestionsForQuiz(int categoryId, int numberOfQuestions) {
         try {
-//            System.out.println("reached question service:-"+category+" "+numberOfQuestions);
-            List<Integer> questionList = questionDao.findRandomQuestionsByCategory(categoryId,numberOfQuestions);
+            List<Long> questionList = questionDao.findRandomQuestionsByCategory(categoryId,numberOfQuestions);
 
             return new ResponseEntity<>(questionList, HttpStatus.OK);
         }
@@ -124,7 +121,7 @@ public class QuestionService {
     public ResponseEntity<?> getQuestionsForManualQuiz(int categoryId, String diffLevel,int numberOfQuestions) {
         try{
             Category category = categoryDao.findById(categoryId).orElseThrow();
-            List<Integer> quesitonIds = questionDao.findRandomQuestionIds(category,diffLevel,numberOfQuestions);
+            List<Long> quesitonIds = questionDao.findRandomQuestionIds(category,diffLevel,numberOfQuestions);
             return new ResponseEntity<>(quesitonIds,HttpStatus.OK);
         }
         catch(Exception e)
@@ -134,12 +131,12 @@ public class QuestionService {
         }
     }
 
-    public ResponseEntity<List<QuestionWrapper>> getQuestionsFromId(List<Integer> questionIds) {
+    public ResponseEntity<List<QuestionWrapper>> getQuestionsFromId(List<Long> questionIds) {
         try{
 
             List<QuestionWrapper> questionWrapper = new ArrayList<>();
             List<Question>  questions  = new ArrayList<>();
-            for(int id:questionIds)
+            for(Long id:questionIds)
             {
                 questions.add(questionDao.findById(id).get());
             }
@@ -173,7 +170,7 @@ public class QuestionService {
             int score = 0;
             for(Response response:responses)
             {
-                Question  question = questionDao.findById(response.getQuiz_question_id()).get();
+                Question question = questionDao.findById(response.getQuiz_question_id()).get();
                 if(response.getResponse().equals(question.getAns()))
                 {
                     score++;
@@ -189,14 +186,13 @@ public class QuestionService {
     }
 
 
-    public ResponseEntity<?> toggleQuestionStatus(int id) {
+    public ResponseEntity<?> toggleQuestionStatus(Long id) {
         try{
             Optional<Question> optionalQuestion = questionDao.findById(id);
             if(optionalQuestion.isPresent())
             {
                 Question question = optionalQuestion.get();
-                Integer currentStatus = Optional.of(question.getIsActive()).orElse(0);
-                question.setIsActive(currentStatus == 0 ? 1 : 0);
+                question.setActive(!question.isActive());
 //                question.setIsActive(question.getIsActive()==0?1:0);
                 questionDao.save(question);
                 return  new ResponseEntity<>(question,HttpStatus.OK);
@@ -208,11 +204,30 @@ public class QuestionService {
         catch(Exception e)
         {
             e.printStackTrace();
-//            logger.error("Error while toggling question status", e);
-            System.out.println(e.getMessage());
             return new ResponseEntity<>("Failed to update the Question Status",HttpStatus.BAD_REQUEST);
         }
     }
 
+    public ResponseEntity<?> validateQuestions(List<Long> questionsIds) {
+        try {
+            List<Question> questionList = questionDao.findAllById(questionsIds);
+            List<QuestionWrapper> inactiveQuestions = questionList.stream()
+                    .filter(q->!q.isActive())
+                    .map(QuestionWrapper::new)
+                    .toList();
+            Map<String,Object> result =new HashMap<>();
+            result.put("totalCount",questionsIds.size());
+            result.put("activeCoubt",questionsIds.size()-inactiveQuestions.size());
+            result.put("inactiveCoubt",inactiveQuestions.size());
+            result.put("allActive",inactiveQuestions.isEmpty());
+            result.put("inactiveQuestions",inactiveQuestions);
 
+            return new ResponseEntity<>(result,HttpStatus.OK);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return new ResponseEntity<>("Failed to return the Quesiton valiidation report",HttpStatus.BAD_REQUEST);
+        }
+    }
 }

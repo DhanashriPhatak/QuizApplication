@@ -3,6 +3,7 @@ package com.dhanashri.Quiz_Service.Service;
 import com.dhanashri.Quiz_Service.Dao.QuizDao;
 import com.dhanashri.Quiz_Service.Feign.QuizInterface;
 import com.dhanashri.Quiz_Service.Module.*;
+import feign.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,7 +27,7 @@ public class QuizService {
     QuizInterface quizInterface;
 
     @Transactional
-    public Quiz createNewVersion(Quiz oldQuiz, String title,String mode, List<Integer> questionIds)
+    public Quiz createNewVersion(Quiz oldQuiz, String title,String mode,int totalQuestions, List<Long> questionIds)
     {
         try{
             //mark old quiz as inactcive
@@ -37,6 +38,7 @@ public class QuizService {
             Quiz newQuiz = new Quiz();
             newQuiz.setQuiz_title(title);
             newQuiz.setMode(mode);
+            newQuiz.setTotal_Questions(totalQuestions);
             newQuiz.setVersion(oldQuiz.getVersion()+1);
             newQuiz.setPreviousVersionId(oldQuiz.getQuiz_id());
             newQuiz.setActive(true);
@@ -61,20 +63,21 @@ public class QuizService {
 
     public ResponseEntity<?> createQuiz(QuizDTO quizDTO) {
         try{
-            Set<Integer> questionIds = distributeQuestions(quizDTO.getNumberOfQuestions(),quizDTO.getCategoryId());
+            Set<Long> questionIds = distributeQuestions(quizDTO.getNumberOfQuestions(),quizDTO.getCategoryId());
             Quiz quiz = new Quiz();
             quiz.setQuiz_title(quizDTO.getQuizTitle());
             quiz.setMode(quizDTO.getMode()!=null? quizDTO.getMode() : "auto");
+            quiz.setTotal_Questions(quizDTO.getNumberOfQuestions());
             List<QuizQuestion> quizQuestionList = new ArrayList<>();
             assert questionIds != null;
-            for(int i:questionIds)
+            for(Long i:questionIds)
             {
                 QuizQuestion quizQuestion = new QuizQuestion();
                 quizQuestion.setQuestion_id(i);
                 quizQuestion.setQuiz(quiz);
                 quizQuestionList.add(quizQuestion);
             }
-            System.out.println("check");
+//            System.out.println("check");
             quiz.setQuestions(quizQuestionList);
             quizDao.save(quiz);
             return new ResponseEntity<>(quiz.getQuiz_id(),HttpStatus.OK);
@@ -89,8 +92,7 @@ public class QuizService {
 
     public ResponseEntity<?> generateQuizManual(ManualQuizRequest manualQuizRequest) {
         try{
-//            System.out.println("inside service");
-            List<Integer> allQuestionIds = new ArrayList<>();
+            List<Long> allQuestionIds = new ArrayList<>();
             for(ManualQuizDTO manualQuizDTO:manualQuizRequest.getConfigList())
             {
                 ResponseEntity<?> idsResponse = null;
@@ -106,7 +108,7 @@ public class QuizService {
 
                 if(idsResponse .getStatusCode().is2xxSuccessful())
                 {
-                    List<Integer> ids = (List<Integer>) idsResponse .getBody();
+                    List<Long> ids = (List<Long>) idsResponse .getBody();
                     if (ids != null) {
                         allQuestionIds.addAll(ids);
                     }
@@ -117,13 +119,13 @@ public class QuizService {
             }
             Quiz quiz = new Quiz();
             quiz.setQuiz_title(manualQuizRequest.getQuizTitle());
+            quiz.setTotal_Questions(manualQuizRequest.getTotalQuestions());
             quiz.setMode(manualQuizRequest.getMode()!=null? manualQuizRequest.getMode() : "manual");
             List<QuizQuestion> quizQuestionList = new ArrayList<>();
 
-            for(int id:allQuestionIds)
+            for(Long id:allQuestionIds)
             {
                 QuizQuestion quizQuestion = new QuizQuestion();
-//                quizQuestion.setQuiz_question_id(id);
                 quizQuestion.setQuestion_id(id);
                 quizQuestion.setQuiz(quiz);
                 quizQuestionList.add(quizQuestion);
@@ -140,10 +142,10 @@ public class QuizService {
         }
     }
 
-    public Set<Integer> distributeQuestions(int totalQuestions,List<Integer> categoryId)
+    public Set<Long> distributeQuestions(int totalQuestions,List<Integer> categoryId)
     {
-        Set<Integer> finalQuestionsId = new HashSet<>();
-        Map<Integer,Set<Integer>> categoryQuestions = new HashMap<>();
+        Set<Long> finalQuestionsId = new HashSet<>();
+        Map<Integer,Set<Long>> categoryQuestions = new HashMap<>();
 
         int perCategory = totalQuestions/categoryId.size();
         int remainder = totalQuestions % categoryId.size();
@@ -160,8 +162,8 @@ public class QuizService {
         for(Integer category:categoryId)
         {
             int desired = desiredCount.get(category);
-            List<Integer> fetched = quizInterface.getQuestionForQuiz(category,desired).getBody();
-
+            ResponseEntity<?> response = quizInterface.getQuestionForQuiz(category,desired);
+            List<Long> fetched = (List<Long>) response.getBody();
             if(fetched==null || fetched.isEmpty())
             {
                 continue;
@@ -184,11 +186,11 @@ public class QuizService {
         {
             if(stillNeeded<=0)break;
 
-            Set<Integer> alreadyFetched = categoryQuestions.getOrDefault(category,new HashSet<>());
+            Set<Long> alreadyFetched = categoryQuestions.getOrDefault(category,new HashSet<>());
             int alreadyCount = alreadyFetched.size();
             int maxToAsk = totalQuestions;
 
-            List<Integer> more = quizInterface.getQuestionForQuiz(category,maxToAsk).getBody();
+            List<Long> more = (List<Long>) quizInterface.getQuestionForQuiz(category,maxToAsk).getBody();
             if(more==null || more.isEmpty())
             {
                 continue;
@@ -208,7 +210,7 @@ public class QuizService {
 
             Quiz quiz = quizDao.findById(id).get();
             List<QuizQuestion> quizQuestionList = quiz.getQuestions();
-            List<Integer> questionIds = quizQuestionList.stream()
+            List<Long> questionIds = quizQuestionList.stream()
                     .map(QuizQuestion::getQuestion_id)
                     .collect(Collectors.toList());
 
@@ -229,7 +231,7 @@ public class QuizService {
             Quiz quiz = quizDao.findById(id).get();
             List<QuizQuestion> quizQuestionList = quiz.getQuestions();
 
-            List<Integer> questionIds = quizQuestionList.stream()
+            List<Long> questionIds = quizQuestionList.stream()
                     .map(QuizQuestion::getQuestion_id)
                     .collect(Collectors.toList());
 
@@ -290,7 +292,7 @@ public class QuizService {
             }
             System.out.println("Inside get quiz details by id");
             Quiz quiz = optionalQuiz.get();
-            List<Integer> questionIds = quiz.getQuestions().stream()
+            List<Long> questionIds = quiz.getQuestions().stream()
                                         .map(QuizQuestion::getQuestion_id)
                                         .toList();
 
@@ -346,18 +348,9 @@ public class QuizService {
             }
             Quiz oldQuiz = optionalQuiz.get();
 
-            Set<Integer> questionIds = distributeQuestions(quizDTO.getNumberOfQuestions(),quizDTO.getCategoryId());
-            Quiz newQuiz = createNewVersion(oldQuiz,quizDTO.getQuizTitle(),"auto",new ArrayList<>(questionIds));
+            Set<Long> questionIds = distributeQuestions(quizDTO.getNumberOfQuestions(),quizDTO.getCategoryId());
+            Quiz newQuiz = createNewVersion(oldQuiz,quizDTO.getQuizTitle(),"auto",quizDTO.getNumberOfQuestions(),new ArrayList<>(questionIds));
 
-//            List<QuizQuestion> quizQuestionList = questionIds.stream().map(id->{
-//                QuizQuestion quizQuestion = new QuizQuestion();
-//                quizQuestion.setQuestion_id(id);
-//                quizQuestion.setQuiz(quiz);
-//                return quizQuestion;
-//            }).toList();
-//
-//            quiz.setQuestions(quizQuestionList);
-//            quizDao.save(quiz);
             return new ResponseEntity<>(newQuiz.getQuiz_id(),HttpStatus.OK);
         }
         catch(Exception e)
@@ -380,8 +373,7 @@ public class QuizService {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Quiz Not Found");
             }
 
-
-            List<Integer> allQuestionIds = new ArrayList<>();
+            List<Long> allQuestionIds = new ArrayList<>();
             for(ManualQuizDTO manualQuizDTO:manualQuizRequest.getConfigList())
             {
                 ResponseEntity<?> idsResponse = null;
@@ -397,7 +389,7 @@ public class QuizService {
 
                 if(idsResponse .getStatusCode().is2xxSuccessful())
                 {
-                    List<Integer> ids = (List<Integer>) idsResponse .getBody();
+                    List<Long> ids = (List<Long>) idsResponse .getBody();
                     if (ids != null) {
                         allQuestionIds.addAll(ids);
                     }
@@ -407,15 +399,7 @@ public class QuizService {
                 }
             }
             Quiz oldQuiz = optionalQuiz.get();
-            Quiz newQuiz = createNewVersion(oldQuiz,manualQuizRequest.getQuizTitle(),"manual",allQuestionIds);
-//            List<QuizQuestion> quizQuestionList = allQuestionIds.stream().map(id->{
-//                QuizQuestion quizQuestion = new QuizQuestion();
-//                quizQuestion.setQuestion_id(id);
-//                quizQuestion.setQuiz(quiz);
-//                return quizQuestion;
-//            }).toList();
-//            quiz.setQuestions(quizQuestionList);
-//            quizDao.save(quiz);
+            Quiz newQuiz = createNewVersion(oldQuiz,manualQuizRequest.getQuizTitle(),"manual",manualQuizRequest.getTotalQuestions(),allQuestionIds);
 
             return new ResponseEntity<>(newQuiz.getQuiz_id(),HttpStatus.OK);
         }
@@ -519,6 +503,33 @@ public class QuizService {
     public ResponseEntity<?> activateQuiz(Long quizId) {
         try{
             Quiz quizToActivate = quizDao.findById(quizId).orElseThrow(()->new RuntimeException("Quiz Not Found with Quiz Id:-"+quizId));
+
+            //Validation 1- to check all questions are active or not
+            List<Long> questions = quizToActivate.getQuestions()
+                    .stream()
+                    .map(QuizQuestion::getQuestion_id)
+                    .toList();
+
+            ResponseEntity<?> validationResp = quizInterface.validateQuestions(questions);
+
+            if(validationResp.getStatusCode() != HttpStatus.OK || !(validationResp.getBody() instanceof  Map))
+            {
+                return new ResponseEntity<>("Failed to validate question",HttpStatus.BAD_REQUEST);
+            }
+
+            Map<String,Object> validationData = (Map<String,Object>) validationResp.getBody();
+            Boolean allActive = (Boolean) validationData.get("allActive");
+
+            if(!Boolean.TRUE.equals((allActive)))
+            {
+                List<Map<String,Object>> inactiveQuestions = (List<Map<String, Object>>) validationData.get("inactiveQuestions");
+
+                Map<String,Object> response = new HashMap<>();
+                response.put("error", "Cannot activate Quiz. Some Questions are inactive.");
+                response.put("inactiveQuestions",inactiveQuestions);
+
+                return  new ResponseEntity<>(response,HttpStatus.CONFLICT);
+            }
 
             //fetch all versions in the chain including current version
             List<Quiz> upward = getVersionHistoryChain(quizId);

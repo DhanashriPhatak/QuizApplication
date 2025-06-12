@@ -15,7 +15,7 @@ const  Questions = ({categoryId,categoryName, registerSetter}) => {
     if (registerSetter) {
       registerSetter(setQuestions);
     }
-  }, [registerSetter]);
+  }, []);
   
   useEffect(()=>{
     if(showQuestion && !fetched)
@@ -23,7 +23,7 @@ const  Questions = ({categoryId,categoryName, registerSetter}) => {
       setLoading(true);
       getQuestionsByCategory(categoryId).
       then(res=>{
-        console.log("data :-",res.data);
+        // console.log("data :-",res.data);
         setQuestions(res.data);
         setFetched(true);
         setLoading(false);

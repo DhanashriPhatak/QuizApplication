@@ -15,7 +15,7 @@ public class QuestionDaoImpl implements  QuestionDaoCustom{
     EntityManager entityManager;
 
     @Override
-    public List<Integer> findRandomQuestionIds(Category category, String diffLevel, int numberOfQuestions) {
+    public List<Long> findRandomQuestionIds(Category category, String diffLevel, int numberOfQuestions) {
         String sql = """
             SELECT q.id FROM question q
             WHERE q.category_id = :category
@@ -25,7 +25,7 @@ public class QuestionDaoImpl implements  QuestionDaoCustom{
             LIMIT :numberOfQuestions
         """;
 
-        List<Integer> resultList = entityManager.createNativeQuery(sql)
+        List<Long> resultList = entityManager.createNativeQuery(sql)
                 .setParameter("category", category.getId())
                 .setParameter("diffLevel", diffLevel)
                 .setParameter("numberOfQuestions", numberOfQuestions)

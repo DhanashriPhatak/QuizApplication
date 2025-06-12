@@ -5,5 +5,5 @@ import com.dhanashri.Question.service.Module.Category;
 import java.util.List;
 
 public interface QuestionDaoCustom {
-    List<Integer> findRandomQuestionIds(Category category, String diffLevel, int numberOfQuestions);
+    List<Long> findRandomQuestionIds(Category category, String diffLevel, int numberOfQuestions);
 }

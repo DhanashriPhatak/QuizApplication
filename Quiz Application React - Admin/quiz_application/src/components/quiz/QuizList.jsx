@@ -104,6 +104,8 @@ const QuizList = ({status,reloadTrigger,onReload}) => {
   }
   /** End- view Wuiz history */
   /**Start - activate from history */
+  const [showConflictModal,setShowConflictModal] = useState(false);
+  const [conflictInfo,setConflictInfo] = useState([]);
   const [showConfirmActivateModal,setShowConfirmActivateModal] = useState(false);
   const [selectedVersionId,setSelectedVersionId] = useState(null);
   const [activating,setActivating] = useState(false);
@@ -128,7 +130,16 @@ const QuizList = ({status,reloadTrigger,onReload}) => {
       setHistory(res.data);
     })
     .catch((err)=>{
-      ShowToast({type:'error',title:'Error',message:'Failed to activate version. Try again later.'});
+      console.log(err.response," -",err.response.status);
+      if(err.response && err.response.status===409)
+      {
+        const inactiveQuestions = err.response.data?.inactiveQuestions || [];
+        setConflictInfo(inactiveQuestions);
+        setShowConflictModal(true);
+      }
+      else{
+        ShowToast({type:'error',title:'Error',message:'Failed to activate version. Try again later.'});
+      }
     })
     .finally(()=>{
       setActivating(false);
@@ -302,6 +313,30 @@ const QuizList = ({status,reloadTrigger,onReload}) => {
         loading={activating}
       />
     )}
+    {showConflictModal && (
+      <div className="modal fade show d-block" tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div className="modal-dialog" role="document">
+          <div className="modal-content">
+            <div className="modal-header bg-warning text-dark">
+              <h5 className="modal-title">Quiz Activation Blocked</h5>
+              <button type="button" className="btn-close" onClick={() => setShowConflictModal(false)}></button>
+            </div>
+            <div className="modal-body">
+              <p>The following questions are inactive and must be active before you can activate this quiz:</p>
+              <ul>
+                {conflictInfo.map((q, index) => (
+                  <li key={index}>{q.question || `Question ID: ${q.id}`}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-secondary" onClick={() => setShowConflictModal(false)}>Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+
     </>
   )
 }

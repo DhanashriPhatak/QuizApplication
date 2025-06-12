@@ -15,7 +15,7 @@ import java.util.List;
 public interface QuizInterface {
 
     @GetMapping("question/generateQuiz")
-    public ResponseEntity<List<Integer>> getQuestionForQuiz(@RequestParam int categoryId,
+    public ResponseEntity<?> getQuestionForQuiz(@RequestParam int categoryId,
                                                             @RequestParam int numberOfQuestions);
 
     @PostMapping("question/generateQuizManual")
@@ -24,8 +24,10 @@ public interface QuizInterface {
                                                        @RequestParam("numberOfQuestions") int numberOfQuestions);
 
     @PostMapping("question/getQuestions")
-    public ResponseEntity<List<QuestionWrapper>> getQuestionById(@RequestBody List<Integer> questionIds);
+    public ResponseEntity<List<QuestionWrapper>> getQuestionById(@RequestBody List<Long> questionIds);
 
+    @PostMapping("question/validateQuestions")
+    public ResponseEntity<?> validateQuestions(@RequestBody List<Long> questionsIds);
 
 
 //    @PostMapping("question/getScore")

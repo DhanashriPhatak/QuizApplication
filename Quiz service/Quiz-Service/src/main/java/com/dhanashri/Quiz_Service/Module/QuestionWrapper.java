@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class QuestionWrapper {
-    private int id;
+    private Long id;
     private String option_1;
     private String option_2;
     private String option_3;

@@ -12,6 +12,7 @@ import java.util.List;
 public class ManualQuizRequest {
     private Long quizId;
     private String quizTitle;
+    private int totalQuestions;
     private List<ManualQuizDTO> configList;
     private String mode;//
 }

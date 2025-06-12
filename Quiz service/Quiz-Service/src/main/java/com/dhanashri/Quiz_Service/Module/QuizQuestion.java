@@ -23,7 +23,7 @@ public class QuizQuestion {
     @JsonBackReference
     private Quiz quiz;
 
-    private int question_id;
+    private Long question_id;
 
     //private int display_order;
     //private int points;
