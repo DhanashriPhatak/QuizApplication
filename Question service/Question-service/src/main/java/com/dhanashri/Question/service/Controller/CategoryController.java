@@ -1,13 +1,9 @@
 package com.dhanashri.Question.service.Controller;
 
 import com.dhanashri.Question.service.Module.Category;
-import com.dhanashri.Question.service.Module.CategoryStatsResponse;
-import com.dhanashri.Question.service.Module.GenerateQuizCategoryDTO;
-import com.dhanashri.Question.service.Module.Response;
+import com.dhanashri.Question.service.DTO.Response.CategoryStatsResponse;
 import com.dhanashri.Question.service.Service.CategoryService;
-import com.netflix.discovery.converters.Auto;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;

@@ -1,7 +1,10 @@
 package com.dhanashri.Question.service.Service;
 
+import com.dhanashri.Question.service.DTO.Request.QuestionWrapper;
+import com.dhanashri.Question.service.DTO.Response.QuestionUsageResponse;
 import com.dhanashri.Question.service.Dao.CategoryDao;
 import com.dhanashri.Question.service.Dao.QuestionDao;
+import com.dhanashri.Question.service.Feign.QuestionInterface;
 import com.dhanashri.Question.service.Module.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.concurrent.CancellationException;
 
 @Service
 public class QuestionService {
@@ -19,6 +21,9 @@ public class QuestionService {
 
     @Autowired
     CategoryDao categoryDao;
+
+    @Autowired
+    QuestionInterface questionInterface;
 
     //To Add a question in Question Database
     public ResponseEntity<?> addQuestion(Question question) {
@@ -189,9 +194,23 @@ public class QuestionService {
     public ResponseEntity<?> toggleQuestionStatus(Long id) {
         try{
             Optional<Question> optionalQuestion = questionDao.findById(id);
+
             if(optionalQuestion.isPresent())
             {
                 Question question = optionalQuestion.get();
+                if(question.isActive())
+                {
+                    ResponseEntity<?> res = questionInterface.isQuestionUsedInActiveQuiz(id);
+                    QuestionUsageResponse questionUsageResponse = (QuestionUsageResponse) res.getBody();
+                    if(res.getStatusCode() == HttpStatus.OK) {
+                        assert questionUsageResponse != null;
+                        if (questionUsageResponse.isUsed()) {
+                            String message = "Cannot deactivate question. It's used in an active quiz."+
+                                    String.join(", ",questionUsageResponse.getQuizTitle());
+                            return new ResponseEntity<>(message, HttpStatus.CONFLICT);
+                        }
+                    }
+                }
                 question.setActive(!question.isActive());
 //                question.setIsActive(question.getIsActive()==0?1:0);
                 questionDao.save(question);

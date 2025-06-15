@@ -1,5 +1,6 @@
-package com.dhanashri.Question.service.Module;
+package com.dhanashri.Question.service.DTO.Request;
 
+import com.dhanashri.Question.service.Module.Question;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,4 +1,4 @@
-package com.dhanashri.Quiz_Service.Module;
+package com.dhanashri.Quiz_Service.DTO.Response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

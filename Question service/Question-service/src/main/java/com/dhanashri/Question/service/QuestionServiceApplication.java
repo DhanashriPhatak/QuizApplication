@@ -2,7 +2,9 @@ package com.dhanashri.Question.service;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
+@EnableFeignClients(basePackages = "com.dhanashri.Question.service.Feign")
 @SpringBootApplication
 public class QuestionServiceApplication {
 

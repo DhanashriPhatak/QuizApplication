@@ -33,7 +33,13 @@ import AddQuestionModal from './AddQuestionModal';
             ShowToast({ type: 'success', title: 'Success', message: msg });
         })
         .catch((error)=>{
-            ShowToast({type:'error',title:'Error',message:'Failed to Toggle the status of a Question. Please try again.'});
+            let errorMsg = 'Failed to toggle the status of a Question. Please try again.';
+
+            // Check for 409 Conflict
+            if (error?.response?.status === 409) {
+                errorMsg = error?.response?.data || 'This question is used in an active quiz and cannot be deactivated.';
+            }
+            ShowToast({type:'error',title:'Error',message:errorMsg});
         })
         .finally(() => {
             setUpdatingId(null);

@@ -1,7 +1,6 @@
 package com.dhanashri.Quiz_Service.Dao;
 
 import com.dhanashri.Quiz_Service.Module.Quiz;
-import com.dhanashri.Quiz_Service.Module.QuizStatusCount;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -59,4 +58,11 @@ public interface QuizDao extends JpaRepository<Quiz,Long> {
       )
     """)
     Long countStandaloneInactiveQuizzes();
+
+    @Query("""
+    SELECT q FROM Quiz q
+    Join q.questions qq
+    WHERE q.isActive = true AND qq.question_id=:questionId
+    """)
+    List<Quiz> findActiveQuizzesUsingQuestion(@Param("questionId") Long questionId);
 }

@@ -1,5 +1,8 @@
 package com.dhanashri.Quiz_Service.Controller;
 
+import com.dhanashri.Quiz_Service.DTO.Request.ManualQuizRequest;
+import com.dhanashri.Quiz_Service.DTO.Request.QuizDTO;
+import com.dhanashri.Quiz_Service.DTO.Response.QuestionUsageResponse;
 import com.dhanashri.Quiz_Service.Module.*;
 import com.dhanashri.Quiz_Service.Service.QuizService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -7,7 +10,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.ws.rs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -132,5 +134,13 @@ public class QuizController {
     public ResponseEntity<?> deactivateQuiz(@PathVariable Long quizId)
     {
         return quizService.deactivateQuiz(quizId);
+    }
+
+    @Operation(summary = "Question is present in active quiz or not" ,
+            description = "Check if give question id is present in any of the active quiz or not")
+    @GetMapping("isQuestionUsed/{questionId}")
+    public ResponseEntity<QuestionUsageResponse> isQuestionUsedInActiveQuiz(@PathVariable Long questionId)
+    {
+        return quizService.isQuestionUsedInActiveQuiz(questionId);
     }
 }

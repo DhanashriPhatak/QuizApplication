@@ -1,9 +1,14 @@
 package com.dhanashri.Quiz_Service.Service;
 
+import com.dhanashri.Quiz_Service.DTO.Request.ManualQuizDTO;
+import com.dhanashri.Quiz_Service.DTO.Request.ManualQuizRequest;
+import com.dhanashri.Quiz_Service.DTO.Request.QuizDTO;
+import com.dhanashri.Quiz_Service.DTO.Response.CategoryDifficultyPair;
+import com.dhanashri.Quiz_Service.DTO.Response.QuestionUsageResponse;
+import com.dhanashri.Quiz_Service.DTO.Response.QuizDetailResponse;
 import com.dhanashri.Quiz_Service.Dao.QuizDao;
 import com.dhanashri.Quiz_Service.Feign.QuizInterface;
 import com.dhanashri.Quiz_Service.Module.*;
-import feign.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -163,7 +168,11 @@ public class QuizService {
         {
             int desired = desiredCount.get(category);
             ResponseEntity<?> response = quizInterface.getQuestionForQuiz(category,desired);
-            List<Long> fetched = (List<Long>) response.getBody();
+            List<?> rawList = (List<?>) response.getBody();
+//            List<Long> fetched = (List<Long>) response.getBody();
+            List<Long> fetched = rawList.stream()
+                    .map(obj -> Long.valueOf(obj.toString()))
+                    .collect(Collectors.toList());
             if(fetched==null || fetched.isEmpty())
             {
                 continue;
@@ -190,7 +199,10 @@ public class QuizService {
             int alreadyCount = alreadyFetched.size();
             int maxToAsk = totalQuestions;
 
-            List<Long> more = (List<Long>) quizInterface.getQuestionForQuiz(category,maxToAsk).getBody();
+            List<?> rawMore = (List<?>) quizInterface.getQuestionForQuiz(category,maxToAsk).getBody();
+            List<Long> more = rawMore.stream()
+                    .map(obj -> Long.valueOf(obj.toString()))
+                    .collect(Collectors.toList());
             if(more==null || more.isEmpty())
             {
                 continue;
@@ -577,6 +589,28 @@ public class QuizService {
         {
             e.printStackTrace();
             return new ResponseEntity<>("Failed to deactivate the quiz. Please Try again.",HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public ResponseEntity<QuestionUsageResponse> isQuestionUsedInActiveQuiz(Long questionId) {
+        try{
+            List<Quiz> activeQuizzes = quizDao.findActiveQuizzesUsingQuestion(questionId);
+
+            if(activeQuizzes.isEmpty())
+            {
+                return new ResponseEntity<>(new QuestionUsageResponse(false,Collections.emptyList()),HttpStatus.OK);
+            }
+
+            List<String> quizList = activeQuizzes.stream()
+                    .map(Quiz::getQuiz_title)
+                    .toList();
+            QuestionUsageResponse questionUsageResponse = new QuestionUsageResponse(true,quizList);
+            return new ResponseEntity<>(questionUsageResponse,HttpStatus.OK);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return new ResponseEntity<>(new QuestionUsageResponse(false,Collections.emptyList()),HttpStatus.BAD_REQUEST);
         }
     }
 }

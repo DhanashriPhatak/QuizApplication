@@ -13,7 +13,7 @@ public interface QuestionDao extends JpaRepository<Question,Long>,QuestionDaoCus
 
     List<Question> findByCategory(Category category);
 
-    @Query(value = "select q.id from question q where q.category_id=:categoryId and q.is_active = 1 order by RANDOM() LIMIT :numQ",nativeQuery = true)
+    @Query(value = "select q.id from question q where q.category_id=:categoryId and q.is_active = true order by RANDOM() LIMIT :numQ",nativeQuery = true)
     List<Long> findRandomQuestionsByCategory(int categoryId, int numQ);
 
 //    @Query(value= """

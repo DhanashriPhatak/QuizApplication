@@ -1,5 +1,7 @@
-package com.dhanashri.Quiz_Service.Module;
+package com.dhanashri.Quiz_Service.DTO.Response;
 
+import com.dhanashri.Quiz_Service.DTO.Response.CategoryDifficultyPair;
+import com.dhanashri.Quiz_Service.Module.QuestionWrapper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
