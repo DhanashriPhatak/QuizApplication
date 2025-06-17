@@ -64,7 +64,6 @@ const Quiz = () => {
                 </li>
                 </ul>
             </div>
-
             <div className="card-body">
                 <div className="tab-content">
                 <div className={`tab-pane ${activeTab === 'active' ? 'active' : ''}`} id="active">
