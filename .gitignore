@@ -41,4 +41,5 @@ Thumbs.db
 ehthumbs.db
 Icon?
 
+# Ignore all application.properties files across all modules
 **/src/main/resources/application.properties

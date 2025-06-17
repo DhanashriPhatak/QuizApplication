@@ -1,0 +1,11 @@
+# application.properties.example
+spring.application.name=Response-Service
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.datasource.url=jdbc:postgresql://localhost:5432/QuizApplicationResponseDB
+spring.datasource.username = your-username
+spring.datasource.password= your-password
+#Becuse we are using default fort 8080 for question service
+server.port=8091
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.property.hibernate.dialect=org.hibernate.dialect.PostgresSQLDialect
