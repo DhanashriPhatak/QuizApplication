@@ -40,3 +40,5 @@ Thumbs.db
 # OS files
 ehthumbs.db
 Icon?
+
+**/src/main/resources/application.properties
