@@ -132,7 +132,7 @@ public class QuestionService {
         catch(Exception e)
         {
             e.printStackTrace();
-            return new ResponseEntity<>("Failed to Qenerate Quiz Questions for maunal mode",HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Failed to Generate Quiz Questions for maunal mode",HttpStatus.BAD_REQUEST);
         }
     }
 

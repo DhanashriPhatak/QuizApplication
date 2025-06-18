@@ -50,7 +50,7 @@ public class QuestionController {
             @ApiResponse(responseCode = "404", description = "Question not found")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteQuesiton(@PathVariable Long id)
+    public ResponseEntity<String> deleteQuestion(@PathVariable Long id)
     {
         return questionService.deleteQuestion(id);
     }
@@ -61,7 +61,7 @@ public class QuestionController {
             @ApiResponse(responseCode = "404", description = "Question not found")
     })
     @GetMapping("getQuestion/{id}")
-    public ResponseEntity<QuestionWrapper> getQuesitonById(@PathVariable Long id)
+    public ResponseEntity<QuestionWrapper> getQuestionById(@PathVariable Long id)
     {
         return questionService.getQuesitonById(id);
     }

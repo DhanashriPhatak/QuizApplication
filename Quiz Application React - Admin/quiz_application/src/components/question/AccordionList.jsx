@@ -27,7 +27,7 @@ import AddQuestionModal from './AddQuestionModal';
                 q.id === id ? { ...q, active: updatedStatus } : q
                 )
             );
-            // console.log("questions:-",questions);
+            console.log("currentStatus:-",currentStatus);
             const status = currentStatus===0 ? 'ACTIVE' : 'INACTIVE';
             const msg = `Question marked as ${status}`;
             ShowToast({ type: 'success', title: 'Success', message: msg });

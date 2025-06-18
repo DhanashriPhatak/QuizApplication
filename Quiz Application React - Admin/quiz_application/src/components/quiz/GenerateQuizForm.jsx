@@ -20,7 +20,6 @@ const GenerateQuizForm = ({editMode=false, initialData = null, onPreviewUpdate})
         mode:'auto' // or manual
     });
 
-    
     /**START :- populate categories */
     const [categories,setCategories] = useState([]);
     useEffect(()=>{

@@ -110,10 +110,15 @@ public class QuizService {
                     idsResponse = quizInterface.getQuestionsForManualQuiz(manualQuizDTO.getCategoryId(),
                             manualQuizDTO.getDiffLevel(),manualQuizDTO.getNumberOfQuestions());
                 }
-
-                if(idsResponse .getStatusCode().is2xxSuccessful())
+                Object responseBody = idsResponse.getBody();
+//                System.out.println("Before idsresponse"+idsResponse.getBody());
+                if(idsResponse.getStatusCode().is2xxSuccessful() && responseBody instanceof List<?>)
                 {
-                    List<Long> ids = (List<Long>) idsResponse .getBody();
+                    List<?> rawList = (List<?>) responseBody;
+                    List<Long> ids = rawList.stream().filter(Objects::nonNull)
+                            .map(id->((Number)id).longValue())
+                            .toList();
+//                    System.out.println(ids);
                     if (ids != null) {
                         allQuestionIds.addAll(ids);
                     }
