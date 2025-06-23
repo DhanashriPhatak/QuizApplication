@@ -20,7 +20,7 @@ public class QuestionDaoImpl implements  QuestionDaoCustom{
             SELECT q.id FROM question q
             WHERE q.category_id = :category
               AND q.diff_level = :diffLevel
-              AND q.is_active = 1
+              AND q.is_active = true
             ORDER BY RANDOM()
             LIMIT :numberOfQuestions
         """;

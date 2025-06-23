@@ -20,9 +20,11 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String username;
-    private String password;
+    private String firstName;
+    private String lastName;
     private String email;
+    private String password;
+
     private boolean enabled = true;
 
     @ManyToMany(fetch = FetchType.EAGER)
