@@ -25,9 +25,7 @@ public class UserDetailsImpl implements UserDetails {
         this.password = user.getPassword();
         this.enabled = user.isEnabled();
         // Defensive copy of roles to avoid lazy-loading issue
-        this.authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
-                .collect(Collectors.toList());
+        this.authorities = List.of(new SimpleGrantedAuthority(user.getRole().getName()));
     }
 
 

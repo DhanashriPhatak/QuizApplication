@@ -18,6 +18,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -50,7 +52,8 @@ public class AuthService {
             }
 
             //fetch default role
-            Role defaultRole = roleRepository.findByName("ROLE_USER")
+            String role = registerRequest.getRole()!=null?registerRequest.getRole():"ROLE_USER";
+            Role userRole1 = roleRepository.findByName(role)
                     .orElseThrow(()->new RuntimeException("Default role not found"));
 
             //create user
@@ -59,7 +62,7 @@ public class AuthService {
                     .password(passwordEncoder.encode(registerRequest.getPassword()))
                     .firstName(registerRequest.getFirstName())
                     .lastName(registerRequest.getLastName())
-                    .roles(Set.of(defaultRole))
+                    .role(userRole1)
                     .enabled(true)
                     .build();
             userRepository.save(user);
