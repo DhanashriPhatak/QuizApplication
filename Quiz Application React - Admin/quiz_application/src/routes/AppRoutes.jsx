@@ -7,6 +7,7 @@ import GenerateQuizPage from '../pages/GenerateQuizPage';
 import CategoriesPage from '../pages/CategoriesPage';
 import QuizPage from '../pages/QuizPage';
 import ViewQuizPage from '../pages/ViewQuizPage';
+import AdminLoginPage from '../pages/AdminLoginPage';
 
 const AppRoutes = () => {
     return (
@@ -23,6 +24,7 @@ const AppRoutes = () => {
           <Route path="users" element={<NotFoundPage/>}/>
           <Route path="*" element={<NotFoundPage />} />
         </Route>
+        <Route path="login" element={<AdminLoginPage/>}/>
       </Routes>
 </BrowserRouter>
 );
