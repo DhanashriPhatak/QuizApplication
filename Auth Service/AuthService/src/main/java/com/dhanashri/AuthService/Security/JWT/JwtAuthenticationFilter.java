@@ -34,7 +34,7 @@ public class JwtAuthenticationFilter  extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String path = request.getServletPath();
-        System.out.println("Reveal path:-"+path);
+//        System.out.println("Reveal path:-"+path);
         if (path.equals("/auth/login") || path.equals("/auth/register")) {
             filterChain.doFilter(request, response);
             return;
@@ -43,18 +43,18 @@ public class JwtAuthenticationFilter  extends OncePerRequestFilter {
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String userEmail;
-        System.out.println("authorization header:-"+authHeader);
+//        System.out.println("authorization header:-"+authHeader);
         //check if header contains the valid bearer token
         if(authHeader == null || !authHeader.startsWith("Bearer "))
         {
-            System.out.println("❌ Missing or invalid Bearer token");
+//            System.out.println("❌ Missing or invalid Bearer token");
             filterChain.doFilter(request,response);
             return;
         }
 
         jwt = authHeader.substring(7);//remove "Bearer "
         userEmail = jwtUtils.getEmailFromToken(jwt);
-        System.out.println("📧 Extracted email from token: " + userEmail);
+//        System.out.println("📧 Extracted email from token: " + userEmail);
         //if user is not yet authenticated
         if(userEmail != null && SecurityContextHolder.getContext().getAuthentication()==null)
         {

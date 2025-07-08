@@ -2,8 +2,10 @@ package com.dhanashri.API_gateway;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
+@ComponentScan(basePackages = "com.dhanashri.API_gateway")
 public class ApiGatewayApplication {
 
 	public static void main(String[] args) {

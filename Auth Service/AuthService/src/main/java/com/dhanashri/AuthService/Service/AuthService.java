@@ -87,7 +87,7 @@ public class AuthService {
 
     public ResponseEntity<AuthResponse> login(LoginRequest loginRequest) {
         try{
-            System.out.println("📦 Inside AuthService login for: " + loginRequest.getEmail());
+//            System.out.println("📦 Inside AuthService login for: " + loginRequest.getEmail());
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             loginRequest.getEmail(),loginRequest.getPassword()
