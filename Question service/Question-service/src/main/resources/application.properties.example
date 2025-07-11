@@ -11,3 +11,6 @@ spring.datasource.password= your-password
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.property.hibernate.dialect=org.hibernate.dialect.PostgresSQLDialect
 management.endpoints.web.exposure.include=*
+
+#should be same as apigateway secret
+gateway.secret = your-secret-code

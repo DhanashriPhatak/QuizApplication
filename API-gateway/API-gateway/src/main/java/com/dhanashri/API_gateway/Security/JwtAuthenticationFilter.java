@@ -47,7 +47,10 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             String token = authHeader.substring(7);
             try {
                 Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
-                return chain.filter(exchange); // Valid token
+                ServerWebExchange mutatedExchange = exchange.mutate()
+                        .request(builder -> builder.header("X-Gateway-Secret","gTw!3s7x8@APIOnly"))
+                        .build();
+                return chain.filter(mutatedExchange); // Valid token
             } catch (JwtException e) {
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                 return exchange.getResponse().setComplete();

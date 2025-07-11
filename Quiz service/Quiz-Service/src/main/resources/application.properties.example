@@ -10,3 +10,6 @@ server.port=8090
 
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.property.hibernate.dialect=org.hibernate.dialect.PostgresSQLDialect
+
+#should be same as apigateway secret
+gateway.secret = your-secret-code
