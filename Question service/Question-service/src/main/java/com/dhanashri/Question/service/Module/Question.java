@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,9 +21,10 @@ public class Question {
     private Long id;
 
     @ManyToOne
-    @NotBlank(message = "Category name must be specified")
+//    @NotBlank(message = "Category name must be specified")
     @JoinColumn(name = "category_id", referencedColumnName = "id")
     @JsonIgnoreProperties({"questions"})
+    @Valid
     private Category category;
     @NotBlank(message = "Difficulty level must be specified")
     private String diff_level;

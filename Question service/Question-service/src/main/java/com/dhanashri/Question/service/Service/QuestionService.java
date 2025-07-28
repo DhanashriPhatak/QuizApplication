@@ -85,15 +85,6 @@ public class QuestionService {
         {
             Question q = questionDao.findById(id)
                     .orElseThrow(()->new ResourceNotFoundException("Question Not found with id:"+id ));
-//                QuestionWrapper questionWrapper1 = new QuestionWrapper();
-//                questionWrapper1.setId(q.getId());
-//                questionWrapper1.setQuestion(q.getQuestion());
-//                questionWrapper1.setCategory(q.getCategoryName());
-//                questionWrapper1.setOption_1(q.getOption_a());
-//                questionWrapper1.setOption_2(q.getOption_b());
-//                questionWrapper1.setOption_3(q.getOption_c());
-//                questionWrapper1.setOption_4(q.getOption_d());
-//                questionWrapper1.setDiff_level(q.getDiff_level());
 
             questionWrapper.add(new QuestionWrapper(q));
         }
