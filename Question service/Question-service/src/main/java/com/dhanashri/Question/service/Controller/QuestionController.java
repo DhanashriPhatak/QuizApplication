@@ -1,17 +1,19 @@
 package com.dhanashri.Question.service.Controller;
 
-import com.dhanashri.Question.service.DTO.Request.QuestionWrapper;
+import com.dhanashri.Question.service.DTO.Response.QuestionWrapper;
 import com.dhanashri.Question.service.Module.*;
 import com.dhanashri.Question.service.Service.QuestionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("question")
@@ -28,9 +30,9 @@ public class QuestionController {
             @ApiResponse(responseCode = "400", description = "Invalid input data")
     })
     @PostMapping("add")
-    public ResponseEntity<?> addQuestion(@RequestBody Question question)
+    public ResponseEntity<Question> addQuestion(@Valid @RequestBody Question question)
     {
-        return questionService.addQuestion(question);
+        return ResponseEntity.ok(questionService.addQuestion(question));
     }
 
     @Operation(summary = "Update a question", description = "Updates the details of an existing question")
@@ -39,9 +41,9 @@ public class QuestionController {
             @ApiResponse(responseCode = "404", description = "Question not found")
     })
     @PostMapping("edit")
-    public ResponseEntity<?> editQuestion(@RequestBody Question question)
+    public ResponseEntity<Question> editQuestion(@Valid @RequestBody Question question)
     {
-        return questionService.editQuestion(question);
+        return ResponseEntity.ok(questionService.editQuestion(question));
     }
 
     @Operation(summary = "Delete question by ID", description = "Deletes a question based on the provided ID")
@@ -52,7 +54,8 @@ public class QuestionController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteQuestion(@PathVariable Long id)
     {
-        return questionService.deleteQuestion(id);
+        questionService.deleteQuestion(id);
+        return ResponseEntity.ok("Question deleted successfully");
     }
 
     @Operation(summary = "Get question by ID", description = "Retrieves a single question by its ID")
@@ -63,7 +66,8 @@ public class QuestionController {
     @GetMapping("getQuestion/{id}")
     public ResponseEntity<QuestionWrapper> getQuestionById(@PathVariable Long id)
     {
-        return questionService.getQuesitonById(id);
+        System.out.println("Inside getquestion");
+        return ResponseEntity.ok(questionService.getQuesitonById(id));
     }
 
     @Operation(summary = "Get all questions", description = "Retrieves all questions from the database")
@@ -73,7 +77,7 @@ public class QuestionController {
     @GetMapping("getAllQuestions")
     public ResponseEntity<List<Question>> getAllQuestions()
     {
-        return questionService.getAllQuestions();
+        return ResponseEntity.ok(questionService.getAllQuestions());
     }
 
     @Operation(summary = "Get questions by category",
@@ -84,7 +88,7 @@ public class QuestionController {
     @GetMapping("getQuestionByCategory/{category}")
     public ResponseEntity<List<Question>> getQuestionsByCategory(@PathVariable int category)
     {
-        return questionService.getQuestionsByCategory(category);
+        return ResponseEntity.ok(questionService.getQuestionsByCategory(category));
     }
 
     @Operation(
@@ -96,10 +100,10 @@ public class QuestionController {
             @ApiResponse(responseCode = "400", description = "Invalid category ID or number of questions")
     })
     @GetMapping("generateQuiz")
-    public ResponseEntity<?> getQuestionsForQuiz(@RequestParam int categoryId,
+    public ResponseEntity<List<Long>> getQuestionsForQuiz(@RequestParam int categoryId,
                                                              @RequestParam int numberOfQuestions)
     {
-        return questionService.getQuestionsForQuiz(categoryId,numberOfQuestions);
+        return ResponseEntity.ok(questionService.getQuestionsForQuiz(categoryId,numberOfQuestions));
     }
 
     @Operation(
@@ -111,11 +115,11 @@ public class QuestionController {
             @ApiResponse(responseCode = "400", description = "Invalid parameters provided")
     })
     @PostMapping("generateQuizManual")
-    public ResponseEntity<?> getQuestionsForManualQuiz(@RequestParam int categoryId,
+    public ResponseEntity<List<Long>> getQuestionsForManualQuiz(@RequestParam int categoryId,
                                                        @RequestParam String diffLevel,
                                                        @RequestParam int numberOfQuestions)
     {
-        return questionService.getQuestionsForManualQuiz(categoryId,diffLevel,numberOfQuestions);
+        return ResponseEntity.ok(questionService.getQuestionsForManualQuiz(categoryId,diffLevel,numberOfQuestions));
     }
 
     @Operation(
@@ -129,7 +133,7 @@ public class QuestionController {
     @PostMapping("getQuestions")
     public ResponseEntity<List<QuestionWrapper>> getQuestionsFromId(@RequestBody List<Long> questionIds)
     {
-        return questionService.getQuestionsFromId(questionIds);
+        return ResponseEntity.ok(questionService.getQuestionsFromId(questionIds));
     }
 
     @Operation(
@@ -141,9 +145,9 @@ public class QuestionController {
             @ApiResponse(responseCode = "400", description = "Invalid responses provided")
     })
     @PostMapping("getScore")
-    public ResponseEntity<Integer> getScore(@RequestBody List<Response> responses)
+    public ResponseEntity<Integer> getScore(@Valid @RequestBody List<@Valid Response> responses)
     {
-        return questionService.getScore(responses);
+        return ResponseEntity.ok(questionService.getScore(responses));
     }
 
     @Operation(
@@ -155,15 +159,14 @@ public class QuestionController {
             @ApiResponse(responseCode = "404", description = "Question ID not found")
     })
     @PutMapping("toggle/{id}")
-    public ResponseEntity<?> toggleQuestionStatus(@PathVariable Long id)
+    public ResponseEntity<Question> toggleQuestionStatus(@PathVariable Long id)
     {
-        return questionService.toggleQuestionStatus(id);
+        return ResponseEntity.ok(questionService.toggleQuestionStatus(id));
     }
 
     @PostMapping("validateQuestions")
-    public ResponseEntity<?> validateQuestions(@RequestBody List<Long> questionsIds)
+    public ResponseEntity<Map<String,Object>> validateQuestions(@RequestBody List<Long> questionsIds)
     {
-        return questionService.validateQuestions(questionsIds);
+        return ResponseEntity.ok(questionService.validateQuestions(questionsIds));
     }
-
 }

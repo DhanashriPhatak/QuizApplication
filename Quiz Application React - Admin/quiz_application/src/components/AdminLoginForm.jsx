@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import Spinner from './common/Spinner';
 import { login } from '../services/AuthService';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from './auth/AuthContext';
 
 const AdminLoginForm = () => {
     const [email,setEmail] = useState('');
     const [password,setPassword] = useState('');
     const [loading,setLoading] = useState(false);
     const navigate = useNavigate();
+    // const {storeToken} = useContext(AuthContext);
+    const {loginSuccess} = useContext(AuthContext);
 
     const handleSubmit = (e)=>{
         e.preventDefault();
@@ -20,8 +23,10 @@ const AdminLoginForm = () => {
         login(payload)
         .then((res)=>{
             console.log("response form login:-",res);
-            localStorage.setItem('token',res.data.token);
-            navigate('/');
+            // localStorage.setItem('token',res.data.token);
+            // storeToken(res.data.token);
+            loginSuccess(res.data.token);
+            navigate('/home');
         })
         .catch((err)=>{
             console.log(err);

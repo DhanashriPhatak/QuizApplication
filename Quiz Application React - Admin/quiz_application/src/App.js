@@ -1,12 +1,16 @@
 import './App.css';
-import React from 'react';
+import React, { useEffect } from 'react';
 import AppRoutes from './routes/AppRoutes';
+import { AuthProvider } from './components/auth/AuthContext';
+import { BrowserRouter } from 'react-router-dom';
+
 
 const App = () => {
-  return <AppRoutes/>;
-}
+  
+  return <AppRoutes />;
+};
 
-export default App
+export default App;
 
 
 // const router = createBrowserRouter(

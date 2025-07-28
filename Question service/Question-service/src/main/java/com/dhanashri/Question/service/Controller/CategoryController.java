@@ -1,5 +1,6 @@
 package com.dhanashri.Question.service.Controller;
 
+import com.dhanashri.Question.service.DTO.Response.GenerateQuizCategoryDTO;
 import com.dhanashri.Question.service.Module.Category;
 import com.dhanashri.Question.service.DTO.Response.CategoryStatsResponse;
 import com.dhanashri.Question.service.Service.CategoryService;
@@ -7,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +31,7 @@ public class CategoryController {
     @GetMapping("getAllCategories")
     public ResponseEntity<List<Category>> getAllCategories()
     {
-        return categoryService.getAllCategories();
+        return ResponseEntity.ok(categoryService.getAllCategories());
     }
 
     @Operation(summary = "Fetch category statistics",
@@ -37,37 +39,40 @@ public class CategoryController {
     @GetMapping("getCategoryStats")
     public ResponseEntity<List<CategoryStatsResponse>> getCategoryStats()
     {
-        return categoryService.getCategoryStats();
+        return ResponseEntity.ok(categoryService.getCategoryStats());
     }
 
     @Operation(summary = "Get count of active questions per category",
             description = "Returns the number of active questions available in each category.")
     @GetMapping("getActiveQuestionCountByCategory")
-    public ResponseEntity<?> getActiveQuestionCountByCategory()
+    public ResponseEntity<List<GenerateQuizCategoryDTO>> getActiveQuestionCountByCategory()
     {
-        return categoryService.getActiveQuestionCountByCategory();
+        return ResponseEntity.ok(categoryService.getActiveQuestionCountByCategory());
     }
 
     @Operation(summary = "Add a new category",description = "Adds a new category to the database.")
     @PostMapping("add")
-    public ResponseEntity<String> addCategory(@RequestBody Category category)
+    public ResponseEntity<String> addCategory(@Valid @RequestBody Category category)
     {
-        return  categoryService.addCategory(category);
+        categoryService.addCategory(category);
+        return ResponseEntity.ok("Category added successfully");
     }
 
     @Operation(summary = "Delete a category",description = "Deletes a category from the database using its ID.")
     @DeleteMapping("/{categoryId}")
     public ResponseEntity<String> deleteCategory(@PathVariable int categoryId)
     {
-        return  categoryService.deleteCategory(categoryId);
+        categoryService.deleteCategory(categoryId);
+        return ResponseEntity.ok("Category deleted successfully");
     }
 
     @Operation(summary = "Update a category",description = "Updates the details of an existing category based on the provided ID.")
     @PutMapping("/{categoryId}")
     public ResponseEntity<String> deleteCategory(
             @PathVariable int categoryId,
-            @RequestBody Category updatedCategory)
+            @Valid @RequestBody Category updatedCategory)
     {
-        return  categoryService.updateCategory(categoryId,updatedCategory);
+        categoryService.updateCategory(categoryId,updatedCategory);
+        return ResponseEntity.ok("Category updated successfully");
     }
 }

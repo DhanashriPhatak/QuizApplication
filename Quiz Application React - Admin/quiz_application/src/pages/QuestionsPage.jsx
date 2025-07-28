@@ -1,8 +1,9 @@
-import React, { useEffect,useState } from 'react';
+import React, { useContext, useEffect,useState } from 'react';
 import Questions from '../components/question/Questions';
 import { getAllCategories } from '../services/QuestionService';
 import Spinner from '../components/common/Spinner';
 import AddQuestionModal from '../components/question/AddQuestionModal';
+import { AuthContext } from '../components/auth/AuthContext';
 
 function QuestionsPage() {
   const [loading, setLoading] = useState(true);
@@ -10,6 +11,8 @@ function QuestionsPage() {
   const [categories,setCategories] = useState([]);
   const [showModal,setShowModal] = useState(false);
   const [questionSetters, setQuestionSetters] = useState({});
+  // const {isAuthenticated} = useContext(AuthContext);
+  // console.log("isAuthenticated:-quesiton:-",isAuthenticated);
   useEffect(()=>{
     setLoading(true);
     getAllCategories()

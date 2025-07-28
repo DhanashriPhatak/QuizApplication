@@ -2,7 +2,7 @@ package com.dhanashri.Question.service.Dao;
 
 import com.dhanashri.Question.service.Module.Category;
 import com.dhanashri.Question.service.DTO.Response.CategoryStatsResponse;
-import com.dhanashri.Question.service.DTO.Request.GenerateQuizCategoryDTO;
+import com.dhanashri.Question.service.DTO.Response.GenerateQuizCategoryDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

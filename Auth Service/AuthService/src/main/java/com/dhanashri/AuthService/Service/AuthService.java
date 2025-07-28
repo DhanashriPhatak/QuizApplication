@@ -40,7 +40,7 @@ public class AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(()->new UsernameNotFoundException("User not found"));
 
-        return jwtUtils.generateToken(user.getEmail());
+        return jwtUtils.generateToken(user.getEmail(),user.getRole().getName());
     }
 
     public ResponseEntity<AuthResponse> register(RegisterRequest registerRequest) {
@@ -68,7 +68,7 @@ public class AuthService {
             userRepository.save(user);
 
             //generate token
-            String token = jwtUtils.generateToken(user.getEmail());
+            String token = jwtUtils.generateToken(user.getEmail(),user.getRole().getName());
             AuthResponse authResponse = AuthResponse.builder()
                     .token(token)
                     .email(user.getEmail())
@@ -95,8 +95,9 @@ public class AuthService {
             );
 
             //if successful
-            String token = jwtUtils.generateToken(loginRequest.getEmail());
+
             User user = userRepository.findByEmail(loginRequest.getEmail()).get();
+            String token = jwtUtils.generateToken(loginRequest.getEmail(),user.getRole().getName());
             AuthResponse authResponse = AuthResponse.builder()
                     .token(token)
                     .email(user.getEmail())

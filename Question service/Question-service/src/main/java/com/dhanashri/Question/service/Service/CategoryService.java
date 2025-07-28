@@ -2,17 +2,14 @@ package com.dhanashri.Question.service.Service;
 
 import com.dhanashri.Question.service.Dao.CategoryDao;
 import com.dhanashri.Question.service.Dao.QuestionDao;
+import com.dhanashri.Question.service.Exception.ResourceNotFoundException;
 import com.dhanashri.Question.service.Module.Category;
 import com.dhanashri.Question.service.DTO.Response.CategoryStatsResponse;
-import com.dhanashri.Question.service.DTO.Request.GenerateQuizCategoryDTO;
+import com.dhanashri.Question.service.DTO.Response.GenerateQuizCategoryDTO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CategoryService {
@@ -22,86 +19,34 @@ public class CategoryService {
     @Autowired
     QuestionDao questionDao;
 
-    public ResponseEntity<List<Category>> getAllCategories() {
-        try{
-            List<Category> categories = categoryDao.findAll();
-            return new ResponseEntity<>(categories, HttpStatus.OK);
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-            return new ResponseEntity<>(new ArrayList<>(),HttpStatus.BAD_REQUEST);
-        }
+    public List<Category> getAllCategories() {
+        return categoryDao.findAll();
     }
 
-    public ResponseEntity<List<CategoryStatsResponse>> getCategoryStats() {
-        try{
-            List<CategoryStatsResponse> categoryStatsResponses = categoryDao.getCategoryStats();
-
-            return new ResponseEntity<>(categoryStatsResponses,HttpStatus.OK);
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST);
-        }
+    public List<CategoryStatsResponse> getCategoryStats() {
+        return categoryDao.getCategoryStats();
     }
 
-    public ResponseEntity<?> getActiveQuestionCountByCategory() {
-        try{
-            List<GenerateQuizCategoryDTO> generateQuizCategoryDTOS = categoryDao.getGenerateQuizInventory();
-            return new ResponseEntity<>(generateQuizCategoryDTOS, HttpStatus.OK);
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();;
-            return new ResponseEntity<>("Error Occured while getting the count of active questions by category",HttpStatus.BAD_REQUEST);
-        }
+    public List<GenerateQuizCategoryDTO> getActiveQuestionCountByCategory() {
+        return categoryDao.getGenerateQuizInventory();
     }
 
-    public ResponseEntity<String> addCategory(Category category) {
-        try{
-            System.out.println(category.getCategory());
-            categoryDao.save(category);
-            return new ResponseEntity<>("Success", HttpStatus.OK);
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-            return new ResponseEntity<>("Error Occurred while saving the Category",HttpStatus.BAD_REQUEST);
-        }
+    public void addCategory(Category category) {
+        categoryDao.save(category);
     }
 
-    public ResponseEntity<String> deleteCategory(int categoryId) {
-        try{
-            categoryDao.deleteById(categoryId);
-            return new ResponseEntity<>("Success",HttpStatus.OK);
+    public void deleteCategory(int categoryId) {
+        if (!categoryDao.existsById(categoryId)) {
+            throw new ResourceNotFoundException("Category not found with ID: " + categoryId);
         }
-        catch(Exception e)
-        {
-            return new ResponseEntity<>("Error occured while deleting Category",HttpStatus.BAD_REQUEST);
-        }
+        categoryDao.deleteById(categoryId);
     }
 
-    public ResponseEntity<String> updateCategory(int categoryId, Category updatedCategory) {
-        try{
-            Optional<Category> existingCategoryOpt = categoryDao.findById(categoryId);
-            if(existingCategoryOpt.isPresent())
-            {
-                Category existingCategory = existingCategoryOpt.get();
-                existingCategory.setCategory(updatedCategory.getCategory());
-                categoryDao.save(existingCategory);
-                return new ResponseEntity<>("Category Updated Successfully",HttpStatus.OK);
-            }
-            else {
-                return new ResponseEntity<>("Category not found", HttpStatus.NOT_FOUND);
-            }
-        }
-        catch(Exception e)
-        {
-            return new ResponseEntity<>("Error occured while updating Category",HttpStatus.BAD_REQUEST);
-        }
+    public void updateCategory(int categoryId, Category updatedCategory) {
+        Category existingCategory = categoryDao.findById(categoryId)
+                .orElseThrow(()->new ResourceNotFoundException("Category not found with Id:-"+categoryId));
+
+        existingCategory.setCategory(updatedCategory.getCategory());
+        categoryDao.save(existingCategory);
     }
-
-
 }

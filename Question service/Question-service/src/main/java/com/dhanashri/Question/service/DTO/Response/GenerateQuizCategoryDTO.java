@@ -1,4 +1,4 @@
-package com.dhanashri.Question.service.DTO.Request;
+package com.dhanashri.Question.service.DTO.Response;
 
 public interface GenerateQuizCategoryDTO {
     Integer getCategoryId();
