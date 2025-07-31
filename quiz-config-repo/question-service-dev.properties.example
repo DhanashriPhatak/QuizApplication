@@ -12,3 +12,6 @@ management.endpoints.web.exposure.include=*
 
 #should be same as apigateway secret
 gateway.secret = your-secret-code
+
+spring.boot.admin.client.enabled=true
+management.endpoint.health.show-details=always
