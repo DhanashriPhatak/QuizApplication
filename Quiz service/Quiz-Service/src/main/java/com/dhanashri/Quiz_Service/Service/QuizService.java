@@ -11,13 +11,16 @@ import com.dhanashri.Quiz_Service.Exception.InvalidQuizActivationException;
 import com.dhanashri.Quiz_Service.Exception.ResourceNotFoundException;
 import com.dhanashri.Quiz_Service.Feign.QuizInterface;
 import com.dhanashri.Quiz_Service.Module.*;
+import com.dhanashri.common.events.QuizNotificationEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +36,34 @@ public class QuizService {
 
     @Autowired
     QuizInterface quizInterface;
+
+    @Value("${quiz.notification.topic}")
+    private String topicName;
+
+    @Autowired
+    private KafkaTemplate<String,QuizNotificationEvent> kafkaTemplate;
+
+    public void publishQuizCreatedEvent(Quiz quiz)
+    {
+        System.out.println("inside event");
+        try {
+            System.out.println("quizId = " + quiz.getQuiz_id());
+            System.out.println("quizTitle = " + quiz.getQuiz_title());
+            System.out.println("createdAt = " + quiz.getCreatedAt());
+            System.out.println("totalQ = " + quiz.getTotal_Questions());
+            QuizNotificationEvent event = new QuizNotificationEvent(
+                    quiz.getQuiz_id(),
+                    quiz.getQuiz_title(),
+                    quiz.getCreatedAt(),
+                    quiz.getTotal_Questions()
+            );
+            System.out.println("after event");
+            kafkaTemplate.send(topicName, event);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Exception occurred while creating QuizNotificationEvent"+e.getMessage());
+        }
+    }
 
     @Transactional
     public Quiz createNewVersion(Quiz oldQuiz, String title,String mode,int totalQuestions, List<Long> questionIds)
@@ -78,10 +109,12 @@ public class QuizService {
             quizQuestion.setQuiz(quiz);
             quizQuestionList.add(quizQuestion);
         }
-//            System.out.println("check");
+            System.out.println("check");
         quiz.setQuestions(quizQuestionList);
-
-        return quizDao.save(quiz).getQuiz_id();
+        Quiz savedQuiz = quizDao.save(quiz);
+        publishQuizCreatedEvent(savedQuiz);
+        System.out.println("check");
+        return savedQuiz.getQuiz_id();
     }
 
     public Long generateQuizManual(ManualQuizRequest manualQuizRequest) {

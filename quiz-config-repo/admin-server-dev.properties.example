@@ -1,0 +1,14 @@
+# application.properties.example
+spring.application.name=admin-server
+
+server.port=9090
+
+# Optional security config (can be extended later)
+spring.security.user.name=your-username
+spring.security.user.password=your-password
+
+management.endpoints.web.exposure.include=*
+spring.boot.admin.discovery.enabled=true
+
+spring.boot.admin.client.enabled=true
+management.endpoint.health.show-details=always
